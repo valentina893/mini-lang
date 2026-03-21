@@ -98,7 +98,7 @@ void variable_assignment_parse_operation(int line_len, long equals_pos, char *li
 
     variable->value = (char*)malloc(sizeof(char) * buf_capacity);
 
-    int op_res;
+    int op_res = 0;
     if (line[op_pos] == '+') {
         op_res = atoi(first_buf) + atoi(second_buf);
     }
