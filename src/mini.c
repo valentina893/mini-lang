@@ -192,6 +192,21 @@ int main(int argc, char **argv) {
         return 0;
     }
 
+    char *extension = strchr(argv[1], '.');
+
+    if (extension == NULL) {
+        printf("File %s isn't of type .mini\n", argv[1]);
+        return 0;
+    } else {
+        int extension_pos = extension - argv[1];
+        char file_extension[5];
+        strncpy(file_extension, argv[1] + extension_pos, 5);
+        if (strcmp(file_extension, ".mini") < 0) {
+            printf("File %s isn't of type .mini\n", argv[1]);
+            return 0;
+        }
+    }
+
     FILE *fptr = fopen(argv[1], "r");
 
     if (fptr == NULL) {
