@@ -117,6 +117,34 @@ int parse_integer(int start, int line_len, variable *variable) {
 
 }
 
+int parse_variable(int start, int line_len, variable *variable) {
+
+    char variable_name[buf_capacity];
+    strncpy(variable_name, line + start, line_len - start);
+
+    for (int i = 0; i < line_len - start; i++) { // set all white spaces to 0
+
+        if (variable_name[i] == ' ' || variable_name[i] == '\n') {
+            variable_name[i] = 0;
+        }
+
+    }
+
+    int existing_var = existing_variable(variable_name);
+
+    if (existing_var == -1) {
+        printf("error: %s is undefined\n", variable_name);
+        return 0;
+    }
+
+    variable->value = (char*)malloc(sizeof(char) * variable_arr[existing_var].len);
+    variable->len = variable_arr[existing_var].len;
+    variable->_type = variable_arr[existing_var]._type;
+    strncpy(variable->value, variable_arr[existing_var].value, variable_arr[existing_var].len);
+    return 1;
+
+}
+
 int parse_variable_value(int line_len, long assignment_pos, variable *variable) {
 
     // read from position of '=' char to end of line
@@ -126,19 +154,27 @@ int parse_variable_value(int line_len, long assignment_pos, variable *variable) 
 
             if (line[i] == '\"') { // reading string
 
-                if (parse_string(i + 1, line_len, variable) == 1) {
-                    break;
-                } else {
-                    return 0;
-                }
+                //if (parse_string(i + 1, line_len, variable) == 1) {
+                    //break;
+                //} else {
+                    //return 0;
+                //}
+
+                return parse_string(i + 1, line_len, variable);
 
             } else if (isdigit(line[i])) { // reading integer
 
-                if (parse_integer(i, line_len, variable) == 1) {
-                    break;
-                } else {
-                    return 0;
-                }
+                //if (parse_integer(i, line_len, variable) == 1) {
+                    //break;
+                //} else {
+                    //return 0;
+                //}
+
+                return parse_integer(i, line_len, variable);
+
+            } else { // reading variable
+
+                return parse_variable(i, line_len, variable);
 
             }
 
@@ -146,7 +182,7 @@ int parse_variable_value(int line_len, long assignment_pos, variable *variable) 
 
     }
 
-    return 1;
+    return 0;
 
 }
 
@@ -174,10 +210,10 @@ void parse_line(int line_len) {
                 }
 
             } else {
-                printf("error parsing value\n");
+                //printf("error parsing value\n");
             }
         } else {
-            printf("error parsing name\n");
+            //printf("error parsing name\n");
         }
         
     }
