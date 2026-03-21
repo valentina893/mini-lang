@@ -65,30 +65,86 @@ int parse_variable_name(long assignment_pos, variable *variable) {
 
 }
 
-int parse_variable_value(int line_len, long assignment_pos, variable *variable) {
+int parse_string(int start, int line_len, variable *variable) {
 
-    int reading = 0;
+    int length = 0;
+    int reading = 1;
 
-    int start = assignment_pos + 1;
-    int length = 1;
-
-    // read from position of '=' char to end of line
-    for (int i = assignment_pos + 1; i < line_len; i++) {
-
-        if (line[i] != ' ' && reading == 0) { // read first character
-            reading = 1;
-            start = i;
-        } else if ((line[i] == ' ' || line[i] == '\n' || line[i] == '\0') && reading == 1) { // read whitespace, newline, or null char after value
-            break;
-        } else if (line[i] != ' ' && reading == 1) { // read next character
+    for (int i = start; i < line_len; i++) {
+        if (line[i] != '\"') { // read character in string
             length++;
+        } else if (line[i] == '\"') { // read end of string
+            reading = 0;
+            break;
         }
+    }
 
+    if (reading == 1) { // never saw an end quote
+        printf("error: string not finished with final \"\n");
+        return 0;
     }
 
     variable->value = (char*)malloc(sizeof(char) * length);
     variable->len = length;
+    variable->_type = string;
     strncpy(variable->value, line + start, length);
+
+    return 1;
+
+}
+
+int parse_integer(int start, int line_len, variable *variable) {
+
+    int length = 1;
+
+    for (int i = start + 1; i < line_len; i++) {
+        if (isdigit(line[i])) { // read character in string
+            length++;
+        } else if (line[i] == '\n' || line[i] == ' ' || line[i] == '\0') { // read end of string
+            break;
+        } else { // read non-integer character
+            printf("error: cannot have %c in an integer\n", line[i]);
+            return 0;
+        }
+    }
+
+    variable->value = (char*)malloc(sizeof(char) * length);
+    variable->len = length;
+    variable->_type = integer;
+    strncpy(variable->value, line + start, length);
+
+    return 1;
+
+}
+
+int parse_variable_value(int line_len, long assignment_pos, variable *variable) {
+
+    // read from position of '=' char to end of line
+    for (int i = assignment_pos + 1; i < line_len; i++) {
+
+        if (line[i] != ' ') { // read first character
+
+            if (line[i] == '\"') { // reading string
+
+                if (parse_string(i + 1, line_len, variable) == 1) {
+                    break;
+                } else {
+                    return 0;
+                }
+
+            } else if (isdigit(line[i])) { // reading integer
+
+                if (parse_integer(i, line_len, variable) == 1) {
+                    break;
+                } else {
+                    return 0;
+                }
+
+            }
+
+        }
+
+    }
 
     return 1;
 
