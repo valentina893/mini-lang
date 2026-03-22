@@ -1,6 +1,7 @@
 #include <ctype.h>
-#include <stdlib.h>
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define max_vars 10
@@ -145,8 +146,236 @@ int parse_variable(int start, int line_len, variable *variable) {
 
 }
 
+int parse_operation_str(int start, int line_len, long operation_pos, variable *variable) {
+
+    if (line[operation_pos] == '-' || line[operation_pos] == '*' || line[operation_pos] == '/') {
+        printf("error: '%c' is an illegal operation on strings\n", line[operation_pos]);
+        return 0;
+    }
+
+    int length = 0;
+    int reading = 1;
+
+    // parse first string
+    for (int i = start; i < operation_pos; i++) {
+        if (line[i] != '\"') { // read character in string
+            length++;
+        } else if (line[i] == '\"') { // read end of string
+            reading = 0;
+            break;
+        }
+    }
+
+    if (reading == 1) { // never saw an end quote
+        printf("error: string not finished with final \"\n");
+        return 0;
+    }
+
+    char res[buf_capacity];
+    strncpy(res, line + start, length);
+    res[length] = 0; // delete null char
+
+    length = 0;
+    reading = 0;
+
+    int second_start = operation_pos + 1;
+
+    // parse second string
+    for (int i = operation_pos + 1; i < line_len; i++) {
+        if (line[i] == '\"' && reading == 0) { // found beginning of string
+            reading = 1;
+            second_start = i + 1;
+        } else if (line[i] != '\"' && reading == 1) { // read char in string
+            length++;
+        } else if (line[i] == '\"' && reading == 1) { // found end of string
+            reading = 0;
+            break;
+        }
+    }
+
+    if (reading == 1) { // never saw an end quote
+        printf("error: string not finished with final \"\n");
+        return 0;
+    }
+
+    strncat(res, line + second_start, length);
+    length = strlen(res);
+
+    variable->value = (char*)malloc(sizeof(char) * length);
+    variable->len = length;
+    variable->_type = string;
+    strcpy(variable->value, res);
+
+    return 1;
+
+}
+
+int parse_operation_int(char operation, int start, int line_len, long operation_pos, variable *variable) {
+
+    int length = 1;
+
+    // parse first int
+    for (int i = start + 1; i < line_len; i++) {
+        if (isdigit(line[i])) { // read digit in int
+            length++;
+        } else if (line[i] == ' ' || line[i] == operation) { // read end of int
+            break;
+        } else { // read non-integer character
+            printf("error: cannot have %c in an integer\n", line[i]);
+            return 0;
+        }
+    }
+
+    //printf("length: %d\n", length);
+
+    char first[buf_capacity];
+    strncpy(first, line + start, length);
+    first[length] = 0; // delete null char
+
+    //printf("first: %s, ", first);
+
+    length = 0;
+
+    start = -1;
+
+    // parse second int
+    for (int i = operation_pos + 1; i < line_len; i++) {
+        if (isdigit(line[i]) && start == -1) { // read first digit in int
+            start = i;
+            length++;
+        } else if ((line[i] == ' ' || line[i] == '\0' || line[i] == '\n') && start != -1) { // read past int
+            break;
+        } else if (isdigit(line[i]) && start > 0) { // read a digit, not first
+            length++;
+        } else { // read non-integer character
+            if (start != -1) { // read non-integer while reading int
+                printf("error: cannot have %c in an integer\n", line[i]);
+                return 0;
+            }
+        }
+    }
+
+    char second[buf_capacity];
+    strncpy(second, line + start, length);
+
+    //printf("second: %s\n", second);
+
+    //printf("second begins at %d\n", start);
+
+    int res, digits;
+    res = 0;
+
+    //printf("%d, %d\n", atoi(first), atoi(second));
+
+    if (line[operation_pos] == '+') {
+        res = atoi(first) + atoi(second);
+    } else if (line[operation_pos] == '-') {
+        res = atoi(first) - atoi(second);
+    } else if (line[operation_pos] == '*') {
+        res = atoi(first) * atoi(second);
+    } else if (line[operation_pos] == '/') {
+        res = atoi(first) / atoi(second);
+    }
+
+    //printf("res: %d\n", res);
+
+    if (res == 0) {
+        digits = 1;
+    } else {
+        digits = floor(log10(abs(res))) + 1;
+    }
+
+    //printf("digits: %d\n", digits);
+
+    variable->value = (char*)malloc(sizeof(char) * digits);
+    variable->len = digits;
+    variable->_type = integer;
+    sprintf(variable->value, "%d", res);
+
+    return 1;
+
+}
+
+int parse_operation(char operation, int start, int line_len, char *operation_res, variable *variable) {
+
+    long operation_pos = operation_res - line;
+
+    // parse first operand
+    for (int i = start; i < operation_pos; i++) {
+
+        if (line[i] != ' ') { // read first character
+
+            if (line[i] == '\"') { // reading string
+
+                //return parse_string(i + 1, line_len, variable);
+                return parse_operation_str(i + 1, line_len, operation_pos, variable);
+
+            } else if (isdigit(line[i])) { // reading integer
+
+                return parse_operation_int(operation, i, line_len, operation_pos, variable);
+
+                //return parse_integer(i, line_len, variable);
+
+            } else { // reading variable
+
+                //return parse_variable(i, line_len, variable);
+
+            }
+
+        }
+
+    }
+
+    return 0;
+
+}
+
 int parse_variable_value(int line_len, long assignment_pos, variable *variable) {
 
+    char *operation_res = strchr(line, '+');
+    if (operation_res != NULL) { // no operation
+        return parse_operation('+', assignment_pos + 1, line_len, operation_res, variable);
+    } else {
+        operation_res = strchr(line, '-');
+        if (operation_res != NULL) {
+            return parse_operation('-', assignment_pos + 1, line_len, operation_res, variable);
+        } else {
+            operation_res = strchr(line, '*');
+            if (operation_res != NULL) {
+                return parse_operation('*', assignment_pos + 1, line_len, operation_res, variable);
+            } else {
+                operation_res = strchr(line, '/');
+                if (operation_res != NULL) {
+                    return parse_operation('/', assignment_pos + 1, line_len, operation_res, variable);
+                }
+            }
+        }
+
+        // read from position of '=' char to end of line
+        for (int i = assignment_pos + 1; i < line_len; i++) {
+
+            if (line[i] != ' ') { // read first character
+
+                if (line[i] == '\"') { // reading string
+
+                    return parse_string(i + 1, line_len, variable);
+
+                } else if (isdigit(line[i])) { // reading integer
+
+                    return parse_integer(i, line_len, variable);
+
+                } else { // reading variable
+
+                    return parse_variable(i, line_len, variable);
+
+                }
+
+            }
+
+        }
+
+    }
+  /*
     // read from position of '=' char to end of line
     for (int i = assignment_pos + 1; i < line_len; i++) {
 
@@ -154,21 +383,9 @@ int parse_variable_value(int line_len, long assignment_pos, variable *variable) 
 
             if (line[i] == '\"') { // reading string
 
-                //if (parse_string(i + 1, line_len, variable) == 1) {
-                    //break;
-                //} else {
-                    //return 0;
-                //}
-
                 return parse_string(i + 1, line_len, variable);
 
             } else if (isdigit(line[i])) { // reading integer
-
-                //if (parse_integer(i, line_len, variable) == 1) {
-                    //break;
-                //} else {
-                    //return 0;
-                //}
 
                 return parse_integer(i, line_len, variable);
 
@@ -181,8 +398,9 @@ int parse_variable_value(int line_len, long assignment_pos, variable *variable) 
         }
 
     }
+  */
 
-    return 0;
+    return 1;
 
 }
 
@@ -210,10 +428,10 @@ void parse_line(int line_len) {
                 }
 
             } else {
-                //printf("error parsing value\n");
+                printf("error parsing value\n");
             }
         } else {
-            //printf("error parsing name\n");
+            printf("error parsing name\n");
         }
         
     }
