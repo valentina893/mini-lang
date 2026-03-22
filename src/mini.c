@@ -296,6 +296,111 @@ int parse_operation_int(char operation, int start, int line_len, long operation_
 
 }
 
+int parse_operation_misc(char operation, int start, int line_len, long operation_pos, variable *variable) {
+
+    char first[buf_capacity];
+    strncpy(first, line + start, line_len - start);
+
+    // parse first operand's variable name
+    for (int i = 0; i < line_len - start; i++) { // set all non char spaces to 0
+
+        if (first[i] == ' ' || first[i] == '\n') {
+            first[i] = 0;
+        }
+
+    }
+
+    int existing_first = existing_variable(first);
+
+    if (existing_first == -1) {
+        printf("error: %s is undefined\n", first);
+        return 0;
+    }
+
+    char second[buf_capacity];
+    //strncpy(second, line + operation_pos, line_len - operation_pos)
+
+    for (int i = operation_pos + 1; i < line_len; i++) {
+        if (line[i] != ' ') {
+            start = i;
+            break;
+        }
+    }
+
+    strncpy(second, line + start, line_len - start);
+
+    for (int i = 0; i < line_len - start; i++) { // set all non char spaces to 0
+
+        if (second[i] == ' ' || second[i] == '\n') {
+            second[i] = 0;
+        }
+
+    }
+
+    int existing_second = existing_variable(second);
+
+    if (existing_second == -1) {
+        printf("error: %s is undefined\n", second);
+        return 0;
+    }
+
+    if (variable_arr[existing_first]._type != variable_arr[existing_second]._type) {
+        printf("error: operations on two different types not supported\n");
+        return 0;
+    } else if (variable_arr[existing_first]._type == string && operation != '+') {
+        printf("error: '%c' is an illegal operation on strings\n", operation);
+        return 0;
+    }
+
+    char res[buf_capacity];
+    int length = 0;
+
+    if (variable_arr[existing_first]._type == string) {
+        strcpy(res, variable_arr[existing_first].value);
+        strcat(res, variable_arr[existing_second].value);
+        length = strlen(res);
+
+        variable->value = (char*)malloc(sizeof(char) * length);
+        variable->len = length;
+        variable->_type = string;
+        strcpy(variable->value, res);
+        return 1;
+    }
+
+    int res2, digits;
+    res2 = 0;
+
+    //printf("%d, %d\n", atoi(first), atoi(second));
+
+    if (line[operation_pos] == '+') {
+        res2 = atoi(variable_arr[existing_first].value) + atoi(variable_arr[existing_second].value);
+    } else if (line[operation_pos] == '-') {
+        res2 = atoi(variable_arr[existing_first].value) - atoi(variable_arr[existing_second].value);
+    } else if (line[operation_pos] == '*') {
+        res2 = atoi(variable_arr[existing_first].value) * atoi(variable_arr[existing_second].value);
+    } else if (line[operation_pos] == '/') {
+        res2 = atoi(variable_arr[existing_first].value) / atoi(variable_arr[existing_second].value);
+    }
+
+    //printf("res: %d\n", res);
+
+    if (res2 == 0) {
+        digits = 1;
+    } else {
+        digits = floor(log10(abs(res2))) + 1;
+    }
+
+    //printf("digits: %d\n", digits);
+
+    variable->value = (char*)malloc(sizeof(char) * digits);
+    variable->len = digits;
+    variable->_type = integer;
+    sprintf(variable->value, "%d", res2);
+
+    return 1;
+
+}
+
 int parse_operation(char operation, int start, int line_len, char *operation_res, variable *variable) {
 
     long operation_pos = operation_res - line;
@@ -318,7 +423,7 @@ int parse_operation(char operation, int start, int line_len, char *operation_res
 
             } else { // reading variable
 
-                //return parse_variable(i, line_len, variable);
+                return parse_operation_misc(operation, i, line_len, operation_pos, variable);
 
             }
 
