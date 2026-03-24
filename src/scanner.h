@@ -1,0 +1,107 @@
+// scanner.h
+
+#ifndef SCANNER_H
+#define SCANNER_H
+
+#include <stdio.h>
+
+#include "token.h"
+
+/*
+Scans source code and "tokenizes" it.
+*/
+typedef struct scanner {
+    
+    // full source code
+    char *src;
+    long size;
+
+    // first char in lexeme
+    int start;
+    // current char being read
+    int current;
+    // current line in src code being read
+    int line;
+
+    // all read tokens in src
+    int tokens_amt;
+    token tokens[100];
+
+} scanner;
+
+/*
+Prints all token lexemes collected by scanner.
+*/
+void _scanner_print_tokens(scanner *scanner);
+
+/*
+Returns 1 if we have reached the end of src, returns 0 otherwise.
+*/
+int _scanner_at_end(scanner *scanner);
+
+/*
+Returns next character in src and increments current.
+*/
+char _scanner_advance(scanner *scanner);
+
+/*
+Adds token of specified type and lexeme length to tokens array.
+*/
+void _scanner_add_token(scanner *scanner, token_type type, char *value_start, const int length);
+
+/*
+Returns 1 if next character in src == expected, otherwise returns 0.
+*/
+int _scanner_match(scanner *scanner, char expected);
+
+/*
+Returns next character in src without consuming it. Acts like a lookahead helper.
+*/
+char _scanner_peek(scanner *scanner);
+
+/*
+Called once we read a " character. Consumes characters until a terminating " is read.
+*/
+void _scanner_string(scanner *scanner);
+
+/*
+Returns 1 if character c is numerical digit 1-9, otherwise returns 0.
+*/
+int _scanner_is_digit(char c);
+
+/*
+Called once we read a digit character (0-9).
+*/
+void _scanner_integer(scanner *scanner);
+
+/*
+Returns 1 if character c is an alphabetic character, otherwise returns 0.
+*/
+int _scanner_is_alpha(char c);
+
+/*
+Returns 1 if character c is an alphabetic character or digit, otherwise returns 0.
+*/
+int _scanner_is_alpha_numeric(char c);
+
+/*
+Called once we read an alphabetic character.
+*/
+void _scanner_identifier(scanner *scanner);
+
+/*
+Matches current character in src with a token if possible.
+*/
+void _scanner_tokenize(scanner *scanner);
+
+/*
+Initializes scanner class with all contents of src file in char array.
+*/
+scanner *scanner_init(char *src_path);
+
+/*
+Fill tokens array by reading content in src.
+*/
+void scanner_get_tokens(scanner *scanner);
+
+#endif
