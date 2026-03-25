@@ -44,11 +44,13 @@ typedef struct token {
 } token;
 
 /*
-Initializes token.
-- type: token type
-- data: raw string data from src
-- size: size of string data
+Initializes token fields.
 */
-token token_init(token_type type, char *data, int size, int line);
+token *token_init(token_type type, char *data, int size, int line);
+
+/*
+Frees dynamically allocated fields and token.
+*/
+void token_delete(token *token);
 
 #endif
