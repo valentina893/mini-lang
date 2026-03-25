@@ -12,9 +12,15 @@ Scans source code and "tokenizes" it.
 */
 typedef struct scanner {
     
+    // all stored tokens
+    token **tokens;
+
     // full source code
     char *src;
-    long size;
+    long src_size;
+
+    // size and capacity of tokens array
+    int tokens_amt, tokens_max;
 
     // first char in lexeme
     int start;
@@ -23,11 +29,12 @@ typedef struct scanner {
     // current line in src code being read
     int line;
 
-    // all read tokens in src
-    int tokens_amt;
-    token tokens[100];
-
 } scanner;
+
+/*
+Resizes tokens array to be double its current maximum capacity.
+*/
+void _scanner_resize_tokens(scanner *scanner);
 
 /*
 Prints all token lexemes collected by scanner.
@@ -97,11 +104,16 @@ void _scanner_tokenize(scanner *scanner);
 /*
 Initializes scanner class with all contents of src file in char array.
 */
-scanner *scanner_init(char *src_path);
+scanner *scanner_init(char *src_path, int tokens_max);
 
 /*
 Fill tokens array by reading content in src.
 */
 void scanner_get_tokens(scanner *scanner);
+
+/*
+Cleans up dynamically allocated memory in scanner class.
+*/
+void scanner_delete(scanner *scanner);
 
 #endif

@@ -2,17 +2,24 @@
 
 #include "scanner.h"
 
+void _scanner_resize_tokens(scanner *scanner) {
+    if (scanner != NULL) {
+        scanner->tokens_max *= 2;
+        scanner->tokens = (struct token**)realloc(scanner->tokens, scanner->tokens_max);
+    }
+}
+
 void _scanner_print_tokens(scanner *scanner) {
     if (scanner != NULL) {
         for (int i = 0; i < scanner->tokens_amt-1; i++) {
-            printf("%d: %s, len = %d\n", i+1, scanner->tokens[i].lexeme, scanner->tokens[i].size);
+            printf("%d: %s, len = %d\n", i+1, scanner->tokens[i]->lexeme, scanner->tokens[i]->size);
         }
     }
 }
 
 int _scanner_at_end(scanner *scanner) {
     if (scanner != NULL) {
-        if (scanner->current >= scanner->size) return 1;
+        if (scanner->current >= scanner->src_size) return 1;
     }
     return 0;
 }
@@ -24,6 +31,9 @@ char _scanner_advance(scanner *scanner) {
 
 void _scanner_add_token(scanner *scanner, token_type type, char *value_start, const int length) {
     if (scanner != NULL) {
+        if (scanner->tokens_amt == scanner->tokens_max) {
+            _scanner_resize_tokens(scanner);
+        }
         scanner->tokens[scanner->tokens_amt] = token_init(type, value_start, length, scanner->line);
         scanner->tokens_amt++;
     }
@@ -150,7 +160,7 @@ void _scanner_tokenize(scanner *scanner) {
 
 }
 
-scanner *scanner_init(char *src_path) {
+scanner *scanner_init(char *src_path, int tokens_max) {
 
     scanner *scanner = NULL;
     FILE *fptr = NULL;
@@ -166,19 +176,21 @@ scanner *scanner_init(char *src_path) {
             
             // get size of src file
             fseek(fptr, 0, SEEK_END);
-            scanner->size = ftell(fptr);
+            scanner->src_size = ftell(fptr);
             rewind(fptr);
 
             // allocate memory for char array and stuff with data
-            scanner->src = (char*)malloc(sizeof(char) * scanner->size + 1);
-            fread(scanner->src, 1, scanner->size, fptr);
-            scanner->src[scanner->size] = '\0';
+            scanner->src = (char*)malloc(sizeof(char) * scanner->src_size + 1);
+            fread(scanner->src, 1, scanner->src_size, fptr);
+            scanner->src[scanner->src_size] = '\0';
 
             // init other scanner attributes
+            scanner->tokens = (struct token**)malloc(sizeof(struct token*));
+            scanner->tokens_amt = 0;
+            scanner->tokens_max = tokens_max;
             scanner->start = 0;
             scanner->current = 0;
             scanner->line = 1;
-            scanner->tokens_amt = 0;
 
             fclose(fptr);
 
@@ -203,6 +215,30 @@ void scanner_get_tokens(scanner *scanner) {
 
         scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, scanner->line);
         scanner->tokens_amt++;
+
+    }
+
+}
+
+void scanner_delete(scanner *scanner) {
+
+    if (scanner != NULL) {
+
+        // free each token in token array
+        for (int i = 0; i < scanner->tokens_amt; i++) {
+            token_delete(scanner->tokens[i]);
+        }
+        
+        // free token array
+        free(scanner->tokens);
+        scanner->tokens_amt = 0;
+
+        // free char* storing src
+        free(scanner->src);
+        scanner->src_size = 0;
+
+        // free scanner class
+        free(scanner);
 
     }
 
