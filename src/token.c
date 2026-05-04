@@ -2,7 +2,7 @@
 
 #include "token.h"
 
-token *token_init(token_type type, char *data, int size, int line) {
+token *token_init(token_type type, char *data, int size, int literal, int line) {
 
     token *token = NULL;
 
@@ -13,7 +13,7 @@ token *token_init(token_type type, char *data, int size, int line) {
         token->lexeme = (char*)malloc(sizeof(char) * size);
         strncpy(token->lexeme, data, size);
         token->size = size;
-        token->literal = 0;
+        token->literal = literal;
         token->line = line;
         token->type = type;
 

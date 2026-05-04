@@ -46,7 +46,7 @@ typedef struct token {
 /*
 Initializes token fields.
 */
-token *token_init(token_type type, char *data, int size, int line);
+token *token_init(token_type type, char *data, int size, int literal, int line);
 
 /*
 Prints token data in format:
