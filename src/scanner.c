@@ -12,7 +12,8 @@ void _scanner_resize_tokens(scanner *scanner) {
 void _scanner_print_tokens(scanner *scanner) {
     if (scanner != NULL) {
         for (int i = 0; i < scanner->tokens_amt-1; i++) {
-            printf("%d: %s, len = %d\n", i+1, scanner->tokens[i]->lexeme, scanner->tokens[i]->size);
+            printf("%d -> ", i+1);
+            token_print(scanner->tokens[i]);
         }
     }
 }
