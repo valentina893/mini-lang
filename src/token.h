@@ -4,6 +4,7 @@
 #define TOKEN_H
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 /*
@@ -31,7 +32,6 @@ typedef struct token {
     char *lexeme;
     int size;
 
-
     // evaluated data, ex. stores 42 from substring "42"
     int literal;
 
@@ -47,6 +47,12 @@ typedef struct token {
 Initializes token fields.
 */
 token *token_init(token_type type, char *data, int size, int line);
+
+/*
+Prints token data in format:
+- "data: -, size: -, literal: -, line:, type: -"
+*/
+void token_print(token *token);
 
 /*
 Frees dynamically allocated fields and token.
