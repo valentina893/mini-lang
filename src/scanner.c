@@ -120,7 +120,12 @@ void _scanner_identifier(scanner *scanner) {
         while (_scanner_is_alpha_numeric(_scanner_peek(scanner))) _scanner_advance(scanner);
         int length = scanner->current - scanner->start;
         char *value_start = scanner->src + scanner->start;
-        _scanner_add_token(scanner, ID, value_start, length, 0);
+        // check if identifier is function call
+        if (_scanner_peek(scanner) == '(') {
+            _scanner_add_token(scanner, FUNCTION, value_start, length, 0);
+        } else {
+            _scanner_add_token(scanner, ID, value_start, length, 0);
+        }
     }
 
 }
@@ -137,6 +142,8 @@ void _scanner_tokenize(scanner *scanner) {
             case '/': _scanner_add_token(scanner, SLASH, scanner->src + scanner->start, 1, 0); break;
             case '*': _scanner_add_token(scanner, STAR, scanner->src + scanner->start, 1, 0); break;
             case ';': _scanner_add_token(scanner, SEMICOLON, scanner->src + scanner->start, 1, 0); break;
+            case ')': _scanner_add_token(scanner, RIGHT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
+            case '(': _scanner_add_token(scanner, LEFT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
 
             // one or two character tokens
             case '=':
