@@ -186,7 +186,7 @@ scanner *scanner_init(char *src_path, int tokens_max) {
             scanner->src[scanner->src_size] = '\0';
 
             // init other scanner attributes
-            scanner->tokens = (struct token**)malloc(sizeof(struct token*));
+            scanner->tokens = (struct token**)malloc(sizeof(struct token*) * tokens_max);
             scanner->tokens_amt = 0;
             scanner->tokens_max = tokens_max;
             scanner->start = 0;
