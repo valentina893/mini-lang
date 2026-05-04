@@ -35,11 +35,14 @@ void token_print(token *token) {
             case SLASH: printf("slash\n"); break;
             case STAR: printf("star\n"); break;
             case SEMICOLON: printf("semicolon\n"); break;
+            case RIGHT_PARENTHESES: printf("right parentheses\n"); break;
+            case LEFT_PARENTHESES: printf("left parentheses\n"); break;
             case EQUAL: printf("equal\n"); break;
             case EQUAL_EQUAL: printf("equal equal\n"); break;
             case ID: printf("id\n"); break;
             case STRING: printf("string\n"); break;
             case INTEGER: printf("integer\n"); break;
+            case FUNCTION: printf("function\n"); break;
             case END: printf("end\n"); break;
             default: break;
         }
