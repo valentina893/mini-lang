@@ -9,6 +9,8 @@
 #define max_vars 10
 #define buf_capacity 100
 
+#define token_max 1000
+
 typedef enum type {
     integer,
     string,
@@ -601,7 +603,7 @@ int main(int argc, char **argv) {
 
 */
 
-    scanner *scanner = scanner_init(argv[1]);
+    scanner *scanner = scanner_init(argv[1], token_max);
     scanner_get_tokens(scanner);
     _scanner_print_tokens(scanner);
 
