@@ -1,5 +1,8 @@
 # mini-lang
 
+function call syntax:
+`print(x);`
+
 todo:
 - create scanner method for converting tokens array from infix to postfix
 
