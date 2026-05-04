@@ -131,6 +131,7 @@ void _scanner_tokenize(scanner *scanner) {
             case '+': _scanner_add_token(scanner, PLUS, scanner->src + scanner->start, 1); break;
             case '/': _scanner_add_token(scanner, SLASH, scanner->src + scanner->start, 1); break;
             case '*': _scanner_add_token(scanner, STAR, scanner->src + scanner->start, 1); break;
+            case ';': _scanner_add_token(scanner, SEMICOLON, scanner->src + scanner->start, 1); break;
 
             // one or two character tokens
             case '=':
