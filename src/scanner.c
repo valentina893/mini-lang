@@ -30,12 +30,12 @@ char _scanner_advance(scanner *scanner) {
     return '\0';
 }
 
-void _scanner_add_token(scanner *scanner, token_type type, char *value_start, const int length) {
+void _scanner_add_token(scanner *scanner, token_type type, char *value_start, const int length, int literal) {
     if (scanner != NULL) {
         if (scanner->tokens_amt == scanner->tokens_max) {
             _scanner_resize_tokens(scanner);
         }
-        scanner->tokens[scanner->tokens_amt] = token_init(type, value_start, length, scanner->line);
+        scanner->tokens[scanner->tokens_amt] = token_init(type, value_start, length, literal, scanner->line);
         scanner->tokens_amt++;
     }
 }
@@ -71,7 +71,7 @@ void _scanner_string(scanner *scanner) {
             _scanner_advance(scanner);
             int length = (scanner->current - 1) - (scanner->start + 1);
             char *value_start = scanner->src + scanner->start + 1;
-            _scanner_add_token(scanner, STRING, value_start,  length);
+            _scanner_add_token(scanner, STRING, value_start, length, 0);
             return;
         }
 
@@ -94,9 +94,13 @@ void _scanner_integer(scanner *scanner) {
         while (_scanner_is_digit(_scanner_peek(scanner))) {
             _scanner_advance(scanner);
         }
-        int length = scanner->current - scanner->start;
+        const int length = scanner->current - scanner->start;
         char *value_start = scanner->src + scanner->start;
-        _scanner_add_token(scanner, INTEGER, value_start, length);
+        // evaluate the literal
+        char literal_buf[length];
+        strncpy(literal_buf, value_start, length);
+        literal_buf[length] = '\0';
+        _scanner_add_token(scanner, INTEGER, value_start, length, atoi(literal_buf));
     }
 }
 
@@ -116,7 +120,7 @@ void _scanner_identifier(scanner *scanner) {
         while (_scanner_is_alpha_numeric(_scanner_peek(scanner))) _scanner_advance(scanner);
         int length = scanner->current - scanner->start;
         char *value_start = scanner->src + scanner->start;
-        _scanner_add_token(scanner, ID, value_start, length);
+        _scanner_add_token(scanner, ID, value_start, length, 0);
     }
 
 }
@@ -128,15 +132,15 @@ void _scanner_tokenize(scanner *scanner) {
 
         switch (c) {
             // single character tokens
-            case '-': _scanner_add_token(scanner, MINUS, scanner->src + scanner->start, 1); break;
-            case '+': _scanner_add_token(scanner, PLUS, scanner->src + scanner->start, 1); break;
-            case '/': _scanner_add_token(scanner, SLASH, scanner->src + scanner->start, 1); break;
-            case '*': _scanner_add_token(scanner, STAR, scanner->src + scanner->start, 1); break;
-            case ';': _scanner_add_token(scanner, SEMICOLON, scanner->src + scanner->start, 1); break;
+            case '-': _scanner_add_token(scanner, MINUS, scanner->src + scanner->start, 1, 0); break;
+            case '+': _scanner_add_token(scanner, PLUS, scanner->src + scanner->start, 1, 0); break;
+            case '/': _scanner_add_token(scanner, SLASH, scanner->src + scanner->start, 1, 0); break;
+            case '*': _scanner_add_token(scanner, STAR, scanner->src + scanner->start, 1, 0); break;
+            case ';': _scanner_add_token(scanner, SEMICOLON, scanner->src + scanner->start, 1, 0); break;
 
             // one or two character tokens
             case '=':
-                _scanner_add_token(scanner, _scanner_match(scanner, '=') ? EQUAL_EQUAL : EQUAL, scanner->src + scanner->start, 1);
+                _scanner_add_token(scanner, _scanner_match(scanner, '=') ? EQUAL_EQUAL : EQUAL, scanner->src + scanner->start, 1, 0);
                 break;
 
             // literals
@@ -215,7 +219,7 @@ void scanner_get_tokens(scanner *scanner) {
             _scanner_tokenize(scanner);
         }
 
-        scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, scanner->line);
+        scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, 0, scanner->line);
         scanner->tokens_amt++;
 
     }

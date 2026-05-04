@@ -54,7 +54,7 @@ char _scanner_advance(scanner *scanner);
 /*
 Adds token of specified type and lexeme length to tokens array.
 */
-void _scanner_add_token(scanner *scanner, token_type type, char *value_start, const int length);
+void _scanner_add_token(scanner *scanner, token_type type, char *value_start, const int length, int literal);
 
 /*
 Returns 1 if next character in src == expected, otherwise returns 0.
