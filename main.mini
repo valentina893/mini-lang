@@ -1,3 +1,3 @@
-str="how ya doin"
-var = 6678
-hello
+x = 3 + 2;
+x = 3 + 2 - 1;
+print(x + 1);
