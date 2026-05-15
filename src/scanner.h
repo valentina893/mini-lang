@@ -32,6 +32,11 @@ typedef struct scanner {
 } scanner;
 
 /*
+Converts tokens array from infix to postfix form.
+*/
+void _scanner_postfix(scanner *scanner);
+
+/*
 Resizes tokens array to be double its current maximum capacity.
 */
 void _scanner_resize_tokens(scanner *scanner);

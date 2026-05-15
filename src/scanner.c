@@ -1,6 +1,78 @@
 // scanner.c
 
+#include <string.h>
+
 #include "scanner.h"
+
+void _scanner_postfix(scanner *scanner) {
+
+    if (scanner != NULL) {
+        // initialize stack
+        int stack_top = -1;
+        const int stack_size = scanner->tokens_amt;
+        token *token_stack[stack_size];
+        for (int i = 0; i < stack_size; i++) {
+            token_stack[i] = NULL;
+        }
+        // initialize result
+        int j = 0;
+        token **result = (struct token**)malloc(sizeof(struct token*) * scanner->tokens_amt);
+        for (int i = 0; i < scanner->tokens_amt; i++) {
+            result[i] = NULL;
+        }
+        // start reading tokens array
+        for (int i = 0; i < scanner->tokens_amt; i++) {
+            if (scanner->tokens[i] != NULL) {
+                token *curr_token = scanner->tokens[i];
+                switch (curr_token->type) {
+                    // operands get pushed to result
+                    case ID:
+                    case INTEGER:
+                    case STRING:
+                        result[j] = curr_token; j++; break;
+                    // '(' gets pushed to stack immediately
+                    case LEFT_PARENTHESES: stack_top++; token_stack[stack_top] = curr_token; break;
+                    // pop from stack until we see a '('
+                    case RIGHT_PARENTHESES:
+                        while (stack_top != -1 && token_stack[stack_top]->type != LEFT_PARENTHESES) {
+                            result[j] = token_stack[stack_top]; j++; stack_top--;
+                        }
+                        stack_top--; // discard '('
+                        break;
+                    // operators
+                    case EQUAL:
+                    case FUNCTION:
+                    case MINUS:
+                    case PLUS:
+                    case SLASH:
+                    case STAR:
+                        // pop top token from stack if higher/equal precedence to curr_token
+                        while (stack_top != -1 && token_stack[stack_top]->type != LEFT_PARENTHESES
+                         && token_prec(token_stack[stack_top]) >= token_prec(curr_token)) {
+                            result[j] = token_stack[stack_top]; j++; stack_top--;
+                         }
+                         // else push curr_token to stack
+                         stack_top++; token_stack[stack_top] = curr_token;
+                         break;
+                    case SEMICOLON:
+                         // pop remaining operators
+                         while (stack_top != -1) {result[j] = token_stack[stack_top]; j++; stack_top--;}
+                         break;
+                    default:
+                        break;
+                }
+            }
+        }
+    
+        // set tokens array to result
+        token **to_free = scanner->tokens;
+        scanner->tokens = result;
+        scanner->tokens_amt = j + 1;
+        free(to_free);
+    
+    }
+
+}
 
 void _scanner_resize_tokens(scanner *scanner) {
     if (scanner != NULL) {
@@ -228,6 +300,8 @@ void scanner_get_tokens(scanner *scanner) {
 
         scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, 0, scanner->line);
         scanner->tokens_amt++;
+
+        _scanner_postfix(scanner);
 
     }
 
