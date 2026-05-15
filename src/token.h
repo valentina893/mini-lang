@@ -51,6 +51,11 @@ Initializes token fields.
 token *token_init(token_type type, char *data, int size, int literal, int line);
 
 /*
+Returns precedence of the token for infix to postfix conversion.
+*/
+int token_prec(token *token);
+
+/*
 Prints token data in format:
 - "data: -, size: -, literal: -, line:, type: -"
 */

@@ -25,6 +25,27 @@ token *token_init(token_type type, char *data, int size, int literal, int line) 
 
 }
 
+int token_prec(token *token) {
+
+    if (token != NULL) {
+        switch (token->type) {
+            case EQUAL: return 0;
+            case FUNCTION: return 1;
+            case LEFT_PARENTHESES: return 2;
+            case MINUS:
+            case PLUS:
+            case STAR:
+            case SLASH:
+                return 3;
+            default:
+                break;
+        }
+    }
+
+    return -1;
+
+}
+
 void token_print(token *token) {
 
     if (token != NULL) {
