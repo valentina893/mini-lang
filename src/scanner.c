@@ -5,7 +5,6 @@
 #include "scanner.h"
 
 void _scanner_postfix(scanner *scanner) {
-
     if (scanner != NULL) {
         token_stack *token_stack = token_stack_init(scanner->tokens_amt);
         int j = 0;
@@ -17,27 +16,15 @@ void _scanner_postfix(scanner *scanner) {
                     case ID: // operands get pushed to result
                     case INTEGER:
                     case STRING: result[j] = curr_token; j++; break;
-                    // '(' gets pushed to stack immediately
-                    case LEFT_PARENTHESES: token_stack_push(token_stack, curr_token); break;
-                    case RIGHT_PARENTHESES: // pop from stack until we see a '('
-                        while (token_stack_is_empty(token_stack) == 0 && token_stack_top(token_stack)->type != LEFT_PARENTHESES) {
-                            result[j++] = token_stack_pop(token_stack);
-                        } token_stack_pop(token_stack); break;
+                    case LEFT_PARENTHESES: token_stack_push(token_stack, curr_token); break; // push '(' to stack immediately
+                    case RIGHT_PARENTHESES: _scanner_find_left_parentheses(result, token_stack, &j); break; // pop until '(' is found
                     case EQUAL: // operators
                     case FUNCTION:
                     case MINUS:
                     case PLUS:
                     case SLASH:
-                    case STAR: // pop top token from stack if higher/equal precedence to curr_token
-                        while (token_stack_is_empty(token_stack) == 0 && token_stack_top(token_stack)->type != LEFT_PARENTHESES
-                         && token_prec(token_stack_top(token_stack)) >= token_prec(curr_token)) {
-                            result[j++] = token_stack_pop(token_stack);
-                         }
-                         // else push curr_token to stack
-                         token_stack_push(token_stack, curr_token); break;
-                    case SEMICOLON:
-                         // pop remaining operators
-                         while (token_stack_is_empty(token_stack) == 0) {result[j++] = token_stack_pop(token_stack);} break;
+                    case STAR: _scanner_handle_operator(result, token_stack, curr_token, &j); break; // pop lower/equal tokens from stack
+                    case SEMICOLON: while (token_stack_is_empty(token_stack) == 0) {result[j++] = token_stack_pop(token_stack);} break; // pop remaining operators
                     default: break;
                 }
             }
@@ -48,6 +35,21 @@ void _scanner_postfix(scanner *scanner) {
         scanner->tokens_amt = j + 1;
         free(to_free);
     }
+}
+
+void _scanner_find_left_parentheses(token** result, token_stack *token_stack, int *j) {
+    while (token_stack_is_empty(token_stack) == 0 && token_stack_top(token_stack)->type != LEFT_PARENTHESES) {
+        result[*j++] = token_stack_pop(token_stack);
+    } 
+    token_stack_pop(token_stack);
+}
+
+void _scanner_handle_operator(token **result, token_stack *token_stack, token* curr_token, int *j) {
+    while (token_stack_is_empty(token_stack) == 0 && token_stack_top(token_stack)->type != LEFT_PARENTHESES
+            && token_prec(token_stack_top(token_stack)) >= token_prec(curr_token)) {
+        result[*j++] = token_stack_pop(token_stack);
+    }
+    token_stack_push(token_stack, curr_token);
 }
 
 void _scanner_resize_tokens(scanner *scanner) {

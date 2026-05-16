@@ -37,6 +37,16 @@ Converts tokens array from infix to postfix form.
 void _scanner_postfix(scanner *scanner);
 
 /*
+Pops operators out of token stack and appends to postfix array until '(' is found.
+*/
+void _scanner_find_left_parentheses(token** result, token_stack *token_stack, int *j);
+
+/*
+Pops operators from token stack until current token has lower precedence than top. Current token is then pushed to stack.
+*/
+void _scanner_handle_operator(token **result, token_stack *token_stack, token* curr_token, int *j);
+
+/*
 Resizes tokens array to be double its current maximum capacity.
 */
 void _scanner_resize_tokens(scanner *scanner);
