@@ -7,7 +7,7 @@
 Data type of the variable.
 */
 typedef enum variable_type {
-    INTEGER, STRING
+    vINTEGER, vSTRING
 } variable_type;
 
 /*
