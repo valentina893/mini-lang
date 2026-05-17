@@ -1,0 +1,4 @@
+x = 33;
+print(x);
+print("hello world!");
+print(89);
