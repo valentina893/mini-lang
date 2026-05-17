@@ -111,15 +111,23 @@ variable *_evaluator_handle_equal_new(evaluator *evaluator, token *dest, token *
 void _evaluator_handle_function(evaluator *evaluator, token *func_token) {
     if (strcmp(func_token->lexeme, "print") == 0) {
         token *to_print = token_stack_pop(evaluator->stack);
-        variable *def_var = _evaluator_variable_seen(evaluator, to_print->lexeme);
-        if (def_var != NULL) {
-            if (def_var->type == vINTEGER) {
-                printf("%d\n", def_var->data.integer);
-            } else if (def_var->type == vSTRING) {
-                printf("%s\n", def_var->data.string);
+        if (to_print->type == ID) {
+            variable *def_var = _evaluator_variable_seen(evaluator, to_print->lexeme);
+            if (def_var != NULL) {
+                if (def_var->type == vINTEGER) {
+                    printf("%d\n", def_var->data.integer);
+                } else if (def_var->type == vSTRING) {
+                    printf("%s\n", def_var->data.string);
+                }
+            } else {
+                printf("variable %s undefined\n", to_print->lexeme);
             }
         } else {
-            printf("variable %s undefined\n", to_print->lexeme);
+            if (to_print->type == INTEGER) {
+                printf("%d\n", to_print->literal);
+            } else if (to_print->type == STRING) {
+                printf("%s\n", to_print->lexeme);
+            }
         }
     }
 }
