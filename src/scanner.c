@@ -47,7 +47,7 @@ void _scanner_find_left_parentheses(token** result, token_stack *token_stack, in
 void _scanner_handle_operator(token **result, token_stack *token_stack, token* curr_token, int *j) {
     while (token_stack_is_empty(token_stack) == 0 && token_stack_top(token_stack)->type != LEFT_PARENTHESES
             && token_prec(token_stack_top(token_stack)) >= token_prec(curr_token)) {
-        result[*j++] = token_stack_pop(token_stack);
+        result[(*j)++] = token_stack_pop(token_stack);
     }
     token_stack_push(token_stack, curr_token);
 }
