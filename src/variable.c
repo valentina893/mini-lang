@@ -12,7 +12,8 @@ variable *variable_init(variable_type type, int data_size, int id_size, char *id
     variable->data_size = data_size;
     variable->id_size = id_size;
     variable->id = (char*)malloc(sizeof(char) * id_size);
-    strcpy(variable->id, id);
+    strncpy(variable->id, id, id_size);
+    variable->id[id_size] = '\0';
     variable->data = data;
     return variable;
 
