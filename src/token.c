@@ -56,7 +56,7 @@ token *token_init(token_type type, char *data, int size, int literal, int line) 
 
         token->lexeme = (char*)malloc(sizeof(char) * size);
         strncpy(token->lexeme, data, size);
-        token->lexeme[size - 1] = '\0'; // strncpy doesn't add null terminator
+        token->lexeme[size] = '\0'; // strncpy doesn't add null terminator
         token->size = size;
         token->literal = literal;
         token->line = line;
