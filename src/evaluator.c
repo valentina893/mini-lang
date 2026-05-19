@@ -52,7 +52,7 @@ int _evaluator_handle_operator(evaluator *evaluator, token *curr_token) {
             return _evaluator_handle_equal(evaluator);
             break;
         case PLUS:
-            // handle plus
+            return _evaluator_handle_plus(evaluator);
             break;
         case FUNCTION:
             return _evaluator_handle_function(evaluator, curr_token);
@@ -90,6 +90,8 @@ int _evaluator_handle_equal_existing(evaluator *evaluator, variable *dest_var, t
         dest_var->data.string = src->lexeme;
         dest_var->type = vSTRING;
     } else { // assigned to variable's value
+        printf("reassigning %s\n", dest_var->id);
+        // assigned to different variable
         variable *src_var = _evaluator_variable_seen(evaluator, src->lexeme);
         if (src_var != NULL) {
             dest_var->data = src_var->data;
@@ -119,6 +121,75 @@ variable *_evaluator_handle_equal_new(evaluator *evaluator, token *dest, token *
         }
     }
     return NULL;
+}
+
+int _evaluator_handle_plus(evaluator *evaluator) {
+    if (evaluator != NULL) {
+        token *b = token_stack_pop(evaluator->stack);
+        token *a = token_stack_pop(evaluator->stack);
+        // a is a variable
+        if (a->type == ID) {
+            // b is a variable
+            // b is an integer
+            // b is a string
+            return _evaluator_handle_plus_variable(evaluator, a, b);
+        }
+        // a is an integer
+        else if (a->type == INTEGER) {
+            // b is a variable
+            // b is an integer
+            // b is a string
+        }
+        // a is a string
+        else {
+            // b is a variable
+            // b is an integer
+            // b is a string
+        }
+    }
+    return 0;
+}
+
+int _evaluator_handle_plus_variable(evaluator *evaluator, token *a, token *b) {
+    if (evaluator != NULL) {
+        variable *a_var = _evaluator_variable_seen(evaluator, a->lexeme);
+        if (a_var != NULL) {
+            // b is a variable
+            if (b->type == ID) {
+                variable *b_var = _evaluator_variable_seen(evaluator, b->lexeme);
+                if (b_var != NULL) {
+                    // b is a variable storing an integer
+                    if (b_var->type == vINTEGER) {
+                        token *res = token_init(INTEGER, a->lexeme, a->size, a_var->data.integer + b_var->data.integer, a->line);
+                        token_stack_push(evaluator->stack, res);
+                    }
+                    // b is a variable storing a string
+                    else if (b_var->type == vSTRING) {
+                        char *cat = strcat(a_var->data.string, b_var->data.string);
+                        token *res = token_init(STRING, cat, strlen(cat), 0, a->line);
+                        token_stack_push(evaluator->stack, res);
+                    }
+                } else {
+                    printf("mini: line %d, variable %s undefined\n", b->line, b->lexeme);
+                    return 0;
+                }
+            // b is an integer
+            } else if (b->type == INTEGER) {
+                token *res = token_init(INTEGER, a->lexeme, a->size, a_var->data.integer + b->literal, a->line);
+                token_stack_push(evaluator->stack, res);
+            }
+            // b is a string
+            else {
+                char *cat = strcat(a_var->data.string, b->lexeme);
+                token *res = token_init(STRING, cat, strlen(cat), 0, a->line);
+                token_stack_push(evaluator->stack, res);
+            }
+            return 1;
+        } else {
+            printf("mini: line %d, variable %s undefined\n", a->line, a->lexeme);
+        }
+    }
+    return 0;
 }
 
 int _evaluator_handle_function(evaluator *evaluator, token *func_token) {

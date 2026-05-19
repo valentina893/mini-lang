@@ -57,6 +57,26 @@ Handles assignment to a new variable.
 variable *_evaluator_handle_equal_new(evaluator *evaluator, token *dest, token *src);
 
 /*
+Handles plus operation, checks if being used arithmetically or for string concatenation.
+*/
+int _evaluator_handle_plus(evaluator *evaluator);
+
+/*
+Handles plus operation for variables.
+*/
+int _evaluator_handle_plus_variable(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles plus operation for integers.
+*/
+int _evaluator_handle_plus_integer(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles plus operation for strings.
+*/
+int _evaluator_handle_plus_string(evaluator *evaluator, token *a, token *b);
+
+/*
 Handles function calls.
 */
 int _evaluator_handle_function(evaluator *evaluator, token *func_token);
