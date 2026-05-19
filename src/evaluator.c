@@ -144,6 +144,17 @@ int _evaluator_handle_function(evaluator *evaluator, token *func_token) {
             }
         }
         return 1;
+    } else if (strcmp(func_token->lexeme, "input") == 0) {
+        char buf[100];
+        if (fgets(buf, sizeof(buf), stdin) != NULL) {
+            buf[strcspn(buf, "\n")] = 0;
+            size_t len = strlen(buf);
+            token *ret = token_init(STRING, buf, len, 0, func_token->line);
+            token_stack_push(evaluator->stack, ret);
+            return 1;
+        }
+        printf("mini: line %d, issue calling input()\n", func_token->line);
+        return 0;
     }
     printf("mini: line %d, call to undefined function %s()\n", func_token->line, func_token->lexeme);
     return 0;
