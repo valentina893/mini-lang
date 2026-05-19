@@ -258,7 +258,7 @@ scanner *scanner_init(char *src_path, int tokens_max) {
             fclose(fptr);
 
         } else {
-            printf("Unknown file '%s'\n", src_path);
+            printf("mini: unknown file: '%s'\n", src_path);
         }
 
     }
