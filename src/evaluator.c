@@ -68,7 +68,10 @@ void _evaluator_handle_equal(evaluator *evaluator) {
         if (dest_var != NULL) {
             _evaluator_handle_equal_existing(evaluator, dest_var, src);
         } else {
-            evaluator->memory[evaluator->variable_amt++] = _evaluator_handle_equal_new(evaluator, dest, src);
+            variable *new_var = _evaluator_handle_equal_new(evaluator, dest, src);
+            if (new_var != NULL) {
+                evaluator->memory[evaluator->variable_amt++] = new_var;
+            }
         }
     }
 }
@@ -86,7 +89,7 @@ void _evaluator_handle_equal_existing(evaluator *evaluator, variable *dest_var, 
             dest_var->data = src_var->data;
             dest_var->type = src_var->type;
         } else {
-            printf("variable %s is undefined\n", src->lexeme);
+            printf("mini: line %d, variable %s is undefined\n", src->line, src->lexeme);
         }
     }
 }
@@ -103,6 +106,8 @@ variable *_evaluator_handle_equal_new(evaluator *evaluator, token *dest, token *
         variable *src_var = _evaluator_variable_seen(evaluator, src->lexeme);
         if (src_var != NULL) {
             return variable_init(src_var->type, src->size, dest->size, dest->lexeme, src_var->data);
+        } else {
+            printf("mini: line %d, variable %s is undefined\n", src->line, src->lexeme);
         }
     }
     return NULL;
@@ -120,7 +125,7 @@ void _evaluator_handle_function(evaluator *evaluator, token *func_token) {
                     printf("%s\n", def_var->data.string);
                 }
             } else {
-                printf("variable %s undefined\n", to_print->lexeme);
+                printf("mini: line %d, variable %s undefined\n", to_print->line, to_print->lexeme);
             }
         } else {
             if (to_print->type == INTEGER) {
