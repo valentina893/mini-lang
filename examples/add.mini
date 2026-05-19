@@ -1,0 +1,4 @@
+greeting = "hello, ";
+name = input();
+greeting = greeting + name;
+print(greeting);
