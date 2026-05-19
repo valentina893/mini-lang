@@ -9,7 +9,7 @@ int read_args(int argc, char **argv, char *filename) {
         return 0;
     }
     if (strstr(argv[1], ".mini") == NULL) {
-        printf("mini: file '%s' not of type .mini\n");
+        printf("mini: file '%s' not of type .mini\n", argv[1]);
         return 0;
     }
     size_t len = strlen(argv[1]);
