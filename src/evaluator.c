@@ -17,6 +17,7 @@ evaluator *evaluator_init(int tokens_amt, token **tokens) {
 }
 
 void evaluator_run(evaluator *evaluator) {
+    int exit = 0;
     for (int i = 0; i < evaluator->tokens_amt; i++) {
         token *curr_token = evaluator->tokens[i];
         switch (curr_token->type) {
@@ -26,8 +27,10 @@ void evaluator_run(evaluator *evaluator) {
                 token_stack_push(evaluator->stack, curr_token);
                 break;
             default:
-                if (_evaluator_handle_operator(evaluator, curr_token) == 0) break;
+                if (_evaluator_handle_operator(evaluator, curr_token) == 0) exit = 1;
+                break;
         }
+        if (exit == 1) break;
     }
 }
 
@@ -57,7 +60,7 @@ int _evaluator_handle_operator(evaluator *evaluator, token *curr_token) {
         default:
             break;
     }
-    return 1;
+    return 0;
 }
 
 int _evaluator_handle_equal(evaluator *evaluator) {
@@ -140,6 +143,8 @@ int _evaluator_handle_function(evaluator *evaluator, token *func_token) {
                 printf("%s\n", to_print->lexeme);
             }
         }
+        return 1;
     }
-    return 1;
+    printf("mini: line %d, call to undefined function %s()\n", func_token->line, func_token->lexeme);
+    return 0;
 }
