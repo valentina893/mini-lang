@@ -39,17 +39,17 @@ variable *_evaluator_variable_seen(evaluator *evaluator, char *id);
 /*
 Handles operator token.
 */
-void _evaluator_handle_operator(evaluator *evaluator, token *curr_token);
+int _evaluator_handle_operator(evaluator *evaluator, token *curr_token);
 
 /*
 Handles assignment operators.
 */
-void _evaluator_handle_equal(evaluator *evaluator);
+int _evaluator_handle_equal(evaluator *evaluator);
 
 /*
 Handles assignment to a defined variable.
 */
-void _evaluator_handle_equal_existing(evaluator *evaluator, variable *dest_var, token *src);
+int _evaluator_handle_equal_existing(evaluator *evaluator, variable *dest_var, token *src);
 
 /*
 Handles assignment to a new variable.
@@ -59,6 +59,6 @@ variable *_evaluator_handle_equal_new(evaluator *evaluator, token *dest, token *
 /*
 Handles function calls.
 */
-void _evaluator_handle_function(evaluator *evaluator, token *func_token);
+int _evaluator_handle_function(evaluator *evaluator, token *func_token);
 
 #endif

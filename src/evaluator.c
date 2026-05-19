@@ -26,8 +26,7 @@ void evaluator_run(evaluator *evaluator) {
                 token_stack_push(evaluator->stack, curr_token);
                 break;
             default:
-                _evaluator_handle_operator(evaluator, curr_token);
-                break;
+                if (_evaluator_handle_operator(evaluator, curr_token) == 0) break;
         }
     }
 }
@@ -44,23 +43,24 @@ variable *_evaluator_variable_seen(evaluator *evaluator, char *id) {
     return NULL;
 }
 
-void _evaluator_handle_operator(evaluator *evaluator, token *curr_token) {
+int _evaluator_handle_operator(evaluator *evaluator, token *curr_token) {
     switch (curr_token->type) {
         case EQUAL:
-            _evaluator_handle_equal(evaluator);
+            return _evaluator_handle_equal(evaluator);
             break;
         case PLUS:
             // handle plus
             break;
         case FUNCTION:
-            _evaluator_handle_function(evaluator, curr_token);
+            return _evaluator_handle_function(evaluator, curr_token);
             break;
         default:
             break;
     }
+    return 1;
 }
 
-void _evaluator_handle_equal(evaluator *evaluator) {
+int _evaluator_handle_equal(evaluator *evaluator) {
     token *src = token_stack_pop(evaluator->stack);
     token *dest = token_stack_pop(evaluator->stack);
     if (dest->type == ID) {
@@ -71,12 +71,15 @@ void _evaluator_handle_equal(evaluator *evaluator) {
             variable *new_var = _evaluator_handle_equal_new(evaluator, dest, src);
             if (new_var != NULL) {
                 evaluator->memory[evaluator->variable_amt++] = new_var;
+            } else {
+                return 0;
             }
         }
     }
+    return 1;
 }
 
-void _evaluator_handle_equal_existing(evaluator *evaluator, variable *dest_var, token *src) {
+int _evaluator_handle_equal_existing(evaluator *evaluator, variable *dest_var, token *src) {
     if (src->type == INTEGER) {
         dest_var->data.integer = src->literal;
         dest_var->type = vINTEGER;
@@ -90,8 +93,10 @@ void _evaluator_handle_equal_existing(evaluator *evaluator, variable *dest_var, 
             dest_var->type = src_var->type;
         } else {
             printf("mini: line %d, variable %s is undefined\n", src->line, src->lexeme);
+            return 0;
         }
     }
+    return 1;
 }
 
 variable *_evaluator_handle_equal_new(evaluator *evaluator, token *dest, token *src) {
@@ -113,7 +118,7 @@ variable *_evaluator_handle_equal_new(evaluator *evaluator, token *dest, token *
     return NULL;
 }
 
-void _evaluator_handle_function(evaluator *evaluator, token *func_token) {
+int _evaluator_handle_function(evaluator *evaluator, token *func_token) {
     if (strcmp(func_token->lexeme, "print") == 0) {
         token *to_print = token_stack_pop(evaluator->stack);
         if (to_print->type == ID) {
@@ -126,6 +131,7 @@ void _evaluator_handle_function(evaluator *evaluator, token *func_token) {
                 }
             } else {
                 printf("mini: line %d, variable %s undefined\n", to_print->line, to_print->lexeme);
+                return 0;
             }
         } else {
             if (to_print->type == INTEGER) {
@@ -135,4 +141,5 @@ void _evaluator_handle_function(evaluator *evaluator, token *func_token) {
             }
         }
     }
+    return 1;
 }
