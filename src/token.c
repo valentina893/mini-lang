@@ -95,6 +95,13 @@ void token_print(token *token) {
 
     if (token != NULL) {
         printf("data: %s, size: %d, literal %d, line: %d, type: ", token->lexeme, token->size, token->literal, token->line);
+        token_print_type(token);
+    }
+
+}
+
+void token_print_type(token *token) {
+    if (token != NULL) {
         switch (token->type) {
             case MINUS: printf("minus\n"); break;
             case PLUS: printf("plus\n"); break;
@@ -113,7 +120,6 @@ void token_print(token *token) {
             default: break;
         }
     }
-
 }
 
 void token_delete(token *token) {
