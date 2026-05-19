@@ -1,0 +1,3 @@
+x = input();
+print("your name is:");
+print(x);
