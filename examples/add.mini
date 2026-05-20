@@ -1,4 +1,12 @@
-greeting = "hello, ";
-name = input();
-greeting = greeting + name;
-print(greeting);
+x = "hello";
+print(x);
+x = x + " world";
+print(x);
+x = x + " hi hi hi";
+print(x);
+x = 1;
+print(x);
+x = x + 12;
+print(x);
+x = x + 33;
+print(x);
