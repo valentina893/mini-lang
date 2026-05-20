@@ -6,6 +6,7 @@ Features:
 - 2 data types: integers and strings
 - Dynamic typing
 - Variable assignment via `=`
+- Adding and string concatenation via `+`
 - Print single variables and primitives via `print()`
 - Read strings from standard input via `input()`
 
