@@ -53,9 +53,11 @@ void _scanner_handle_operator(token **result, token_stack *token_stack, token* c
 }
 
 void _scanner_resize_tokens(scanner *scanner) {
+    printf("resizing\n");
     if (scanner != NULL) {
         scanner->tokens_max *= 2;
-        scanner->tokens = (struct token**)realloc(scanner->tokens, scanner->tokens_max);
+        token **temp = (struct token**)realloc(scanner->tokens, sizeof(struct token*) * scanner->tokens_max);
+        scanner->tokens = temp;
     }
 }
 
@@ -82,7 +84,7 @@ char _scanner_advance(scanner *scanner) {
 
 void _scanner_add_token(scanner *scanner, token_type type, char *value_start, const int length, int literal) {
     if (scanner != NULL) {
-        if (scanner->tokens_amt == scanner->tokens_max) {
+        if (scanner->tokens_amt >= scanner->tokens_max) {
             _scanner_resize_tokens(scanner);
         }
         scanner->tokens[scanner->tokens_amt] = token_init(type, value_start, length, literal, scanner->line);
