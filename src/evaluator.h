@@ -67,6 +67,26 @@ Handles plus operation for variables.
 int _evaluator_handle_plus_variable(evaluator *evaluator, token *a, token *b);
 
 /*
+Handles plus operation for operands having an integer variable and another variable.
+*/
+int _evaluator_handle_plus_variable_int_variable(evaluator *evaluator, variable *a_var, token *a, token *b);
+
+/*
+Handles plus operation for operands having an integer variable and a primitive.
+*/
+int _evaluator_handle_plus_variable_int_primitive(evaluator *evaluator, variable *a_var, token *a, token *b);
+
+/*
+Handles plus operation for operands having a string variable and another variable.
+*/
+int _evaluator_handle_plus_variable_string_variable(evaluator *evaluator, variable *a_var, token *a, token *b);
+
+/*
+Handles plus operation for operands having a string variable and a primitive.
+*/
+int _evaluator_handle_plus_variable_string_primitive(evaluator *evaluator, variable *a_var, token *a, token *b);
+
+/*
 Handles plus operation for integers.
 */
 int _evaluator_handle_plus_integer(evaluator *evaluator, token *a, token *b);
