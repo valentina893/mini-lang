@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
             evaluator *evaluator =  evaluator_init(scanner->tokens_amt, scanner->tokens);
             evaluator_run(evaluator);
             // free evaluator
-            scanner_delete(scanner);
+            //scanner_delete(scanner);
         }
     }
 
