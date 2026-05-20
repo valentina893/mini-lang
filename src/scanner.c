@@ -53,7 +53,6 @@ void _scanner_handle_operator(token **result, token_stack *token_stack, token* c
 }
 
 void _scanner_resize_tokens(scanner *scanner) {
-    printf("resizing\n");
     if (scanner != NULL) {
         scanner->tokens_max *= 2;
         token **temp = (struct token**)realloc(scanner->tokens, sizeof(struct token*) * scanner->tokens_max);
