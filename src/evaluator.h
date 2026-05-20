@@ -92,6 +92,16 @@ Handles plus operation for integers.
 int _evaluator_handle_plus_integer(evaluator *evaluator, token *a, token *b);
 
 /*
+Handles plus operation when operands is an integer and variable.
+*/
+int _evaluator_handle_plus_integer_variable(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles plus operation when operands is an integer and primitive.
+*/
+int _evaluator_handle_plus_integer_primitive(evaluator *evaluator, token *a, token *b);
+
+/*
 Handles plus operation for strings.
 */
 int _evaluator_handle_plus_string(evaluator *evaluator, token *a, token *b);

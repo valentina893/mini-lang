@@ -142,7 +142,7 @@ int _evaluator_handle_plus(evaluator *evaluator) {
         }
         // a is an integer
         else if (a->type == INTEGER) {
-            // return _evaluator_handle_plus_integer(evaluator, a, b);
+            return _evaluator_handle_plus_integer(evaluator, a, b);
         }
         // a is a string
         else if (a->type == STRING) {
@@ -204,6 +204,8 @@ int _evaluator_handle_plus_variable_int_variable(evaluator *evaluator, variable 
                 // in the future we can implement a handler function that ignores type safety
                 printf("mini: line %d, variable %s type not integer\n", a->line, b_var->id);
             }
+        } else {
+            printf("mini: line %d, variable %s undefined\n", b->line, b->lexeme);
         }
     }
     return 0;
@@ -260,6 +262,59 @@ int _evaluator_handle_plus_variable_string_primitive(evaluator *evaluator, varia
         // b is not same type primitive as a
         else {
             printf("mini: line %d, primitive %s type not string\n", a->line, b->lexeme);
+        }
+    }
+    return 0;
+}
+
+int _evaluator_handle_plus_integer(evaluator *evaluator, token *a, token *b) {
+    if (evaluator != NULL && a != NULL && b != NULL) {
+        // b is a variable
+        if (b->type == ID) {
+            return _evaluator_handle_plus_integer_variable(evaluator, a, b);
+        }
+        // b is a primitive 
+        else {
+            return _evaluator_handle_plus_integer_primitive(evaluator, a, b);
+        }
+    }
+    return 0;
+}
+
+int _evaluator_handle_plus_integer_variable(evaluator *evaluator, token *a, token *b) {
+    if (evaluator != NULL && a != NULL && b != NULL) {
+        // check if b is defined
+        variable *b_var = _evaluator_variable_seen(evaluator, b->lexeme);
+        if (b_var != NULL) {
+            // b is a variable storing an integer
+            if (b_var->type == vINTEGER) {
+                token *res = token_init(INTEGER, a->lexeme, a->size, a->literal + b_var->data.integer, a->line);
+                token_stack_push(evaluator->stack, res);
+                return 1;
+            }
+            // b is a variable of different type from integer
+            else {
+                // in the future, we can call another helper that works out addition between ints and strings. 
+                printf("mini: line %d, variable %s not of type integer\n", b->line, b_var->id);
+            }
+        } else {
+            printf("mini: line %d, variable %s undefined\n", b->line, b->lexeme);
+        }
+    }
+    return 0;
+}
+
+int _evaluator_handle_plus_integer_primitive(evaluator *evaluator, token *a, token *b) {
+    if (evaluator != NULL && a != NULL && b != NULL) {
+        // b is an integer
+        if (b->type == INTEGER) {
+            token *res = token_init(INTEGER, a->lexeme, a->size, a->literal + b->literal, a->line);
+            token_stack_push(evaluator->stack, res);
+            return 1;
+        }
+        // b is a primitive of different type from integer
+        else {
+            printf("mini: line %d, primitive %s not of type integer\n", b->line, b->lexeme);
         }
     }
     return 0;
