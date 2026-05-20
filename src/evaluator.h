@@ -107,6 +107,21 @@ Handles plus operation for strings.
 int _evaluator_handle_plus_string(evaluator *evaluator, token *a, token *b);
 
 /*
+Handles plus operation where operands are a string and variable.
+*/
+int _evaluator_handle_plus_string_variable(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles plus operation for strings.
+*/
+int _evaluator_handle_plus_string_primitive(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles plus operation for strings.
+*/
+int _evaluator_handle_plus_string(evaluator *evaluator, token *a, token *b);
+
+/*
 Handles function calls.
 */
 int _evaluator_handle_function(evaluator *evaluator, token *func_token);
