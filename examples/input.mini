@@ -1,3 +1,5 @@
+print("what's your name?");
 x = input();
-print("your name is:");
-print(x);
+y = "hello, ";
+y = y + x;
+print(y);
