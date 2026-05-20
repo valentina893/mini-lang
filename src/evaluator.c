@@ -369,7 +369,7 @@ int _evaluator_handle_plus_string_primitive(evaluator *evaluator, token *a, toke
         }
         // b is a primitive of different type from integer
         else {
-            printf("mini: line %d, primitive %s not of type integer\n", b->line, b->lexeme);
+            printf("mini: line %d, primitive %s not of type string\n", b->line, b->lexeme);
         }
     }
     return 0;
