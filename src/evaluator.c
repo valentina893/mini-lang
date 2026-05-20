@@ -87,15 +87,24 @@ int _evaluator_handle_equal_existing(evaluator *evaluator, variable *dest_var, t
         dest_var->data.integer = src->literal;
         dest_var->type = vINTEGER;
     } else if (src->type == STRING) {
-        dest_var->data.string = src->lexeme;
+        size_t len = src->size;
+        strncpy(dest_var->data.string, src->lexeme, len);
+        dest_var->data.string[len] = '\0';
         dest_var->type = vSTRING;
     } else { // assigned to variable's value
         printf("reassigning %s\n", dest_var->id);
         // assigned to different variable
         variable *src_var = _evaluator_variable_seen(evaluator, src->lexeme);
         if (src_var != NULL) {
-            dest_var->data = src_var->data;
-            dest_var->type = src_var->type;
+            if (src_var->type == vSTRING) {
+                size_t len = src_var->data_size;
+                strncpy(dest_var->data.string, src_var->data.string, len);
+                dest_var->data.string[len] = '\0';
+                dest_var->type = vSTRING;
+            } else {
+                dest_var->data = src_var->data;
+                dest_var->type = src_var->type;
+            }
         } else {
             printf("mini: line %d, variable %s is undefined\n", src->line, src->lexeme);
             return 0;
@@ -154,42 +163,78 @@ int _evaluator_handle_plus_variable(evaluator *evaluator, token *a, token *b) {
     if (evaluator != NULL) {
         variable *a_var = _evaluator_variable_seen(evaluator, a->lexeme);
         if (a_var != NULL) {
-            // b is a variable
-            if (b->type == ID) {
-                variable *b_var = _evaluator_variable_seen(evaluator, b->lexeme);
-                if (b_var != NULL) {
-                    // b is a variable storing an integer
-                    if (b_var->type == vINTEGER) {
-                        token *res = token_init(INTEGER, a->lexeme, a->size, a_var->data.integer + b_var->data.integer, a->line);
-                        token_stack_push(evaluator->stack, res);
+            // a is a variable storing an integer
+            if (a_var->type == vINTEGER) {
+                // b is a variable
+                if (b->type == ID) {
+                    variable *b_var = _evaluator_variable_seen(evaluator, b->lexeme);
+                    if (b_var != NULL) {
+                        // b is a variable storing an integer
+                        if (b_var->type == vINTEGER) {
+                            token *res = token_init(INTEGER, a->lexeme, a->size, a_var->data.integer + b_var->data.integer, a->line);
+                            token_stack_push(evaluator->stack, res);
+                        }
+                        // b is not same type variable as a
+                        else {
+                            // in the future we can implement a handler function that ignores type safety
+                            printf("mini: line %d, variable %s type not integer\n", a->line, b_var->id);
+                            return 0;
+                        }
                     }
-                    // b is a variable storing a string
-                    else if (b_var->type == vSTRING) {
-                        char *cat = strcat(a_var->data.string, b_var->data.string);
-                        token *res = token_init(STRING, cat, strlen(cat), 0, a->line);
-                        token_stack_push(evaluator->stack, res);
-                    }
-                } else {
-                    printf("mini: line %d, variable %s undefined\n", b->line, b->lexeme);
+                }
+                // b is an integer 
+                else if (b->type == INTEGER) {
+                    token *res = token_init(INTEGER, a->lexeme, a->size, a_var->data.integer + b->literal, a->line);
+                    token_stack_push(evaluator->stack, res);
+                }
+                // b is not same type primitive as a
+                else {
+                    // again, in the future we can implement a handler function that ignores type safety
+                    printf("mini: line %d, primitive %s type not integer\n", a->line, b->lexeme);
                     return 0;
                 }
-            // b is an integer
-            } else if (b->type == INTEGER) {
-                token *res = token_init(INTEGER, a->lexeme, a->size, a_var->data.integer + b->literal, a->line);
-                token_stack_push(evaluator->stack, res);
             }
-            // b is a string
-            else {
-                char *cat = strcat(a_var->data.string, b->lexeme);
-                token *res = token_init(STRING, cat, strlen(cat), 0, a->line);
-                token_stack_push(evaluator->stack, res);
+            // a is a variable storing a string
+            else if (a_var->type == vSTRING) {
+                // b is a variable
+                if (b->type == ID) {
+                    variable *b_var = _evaluator_variable_seen(evaluator, b->lexeme);
+                    if (b_var != NULL) {
+                        // b is a variable storing a string
+                        if (b_var->type == vSTRING) {
+                            char *cat = strcat(a_var->data.string, b_var->data.string);
+                            token *res = token_init(STRING, cat, strlen(cat), 0, a->line);
+                            token_stack_push(evaluator->stack, res);
+                        }
+                        // b is not same type variable as a
+                        else {
+                            // in the future we can implement a handler function that ignores type safety
+                            printf("mini: line %d, variable %s type not string\n", a->line, b_var->id);
+                            return 0;
+                        }
+                    }
+                }
+                // b is a string
+                else if (b->type == STRING) {
+                    char *cat = strcat(a_var->data.string, b->lexeme);
+                    token *res = token_init(STRING, cat, strlen(cat), 0, a->line);
+                    token_stack_push(evaluator->stack, res);
+                }
+                // b is not same type primitive as a
+                else {
+                    printf("mini: line %d, primitive %s type not string\n", a->line, b->lexeme);
+                    return 0;
+                }
+            } else {
+                printf("mini: line %d, variable %s not valid operand for addition\n", a->line, a_var->id);
+                return 0;
             }
-            return 1;
         } else {
             printf("mini: line %d, variable %s undefined\n", a->line, a->lexeme);
+            return 0;
         }
     }
-    return 0;
+    return 1;
 }
 
 int _evaluator_handle_function(evaluator *evaluator, token *func_token) {
