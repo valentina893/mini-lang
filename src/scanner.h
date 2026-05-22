@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 
+#include "args.h"
 #include "token.h"
 
 /*
@@ -28,6 +29,10 @@ typedef struct scanner {
     int current;
     // current line in src code being read
     int line;
+
+    // scanner args
+    int tokens_infix;
+    int tokens_postfix;
 
 } scanner;
 
@@ -119,7 +124,7 @@ void _scanner_tokenize(scanner *scanner);
 /*
 Initializes scanner class with all contents of src file in char array.
 */
-scanner *scanner_init(char *src_path, int tokens_max);
+scanner *scanner_init(args *args, int tokens_max);
 
 /*
 Fill tokens array by reading content in src.

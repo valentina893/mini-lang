@@ -224,44 +224,51 @@ void _scanner_tokenize(scanner *scanner) {
 
 }
 
-scanner *scanner_init(char *src_path, int tokens_max) {
+scanner *scanner_init(args *args, int tokens_max) {
 
     scanner *scanner = NULL;
     FILE *fptr = NULL;
 
-    if (src_path != NULL) {
+    if (args != NULL) {
 
-        // open src file
-        fptr = fopen(src_path, "rb");
+        if (args->filename != NULL) {
+            // open src file
 
-        if (fptr != NULL) {
+            fptr = fopen(args->filename, "rb");
 
-            scanner = (struct scanner*)malloc(sizeof(struct scanner));
+            if (fptr != NULL) {
+
+                scanner = (struct scanner*)malloc(sizeof(struct scanner));
             
-            // get size of src file
-            fseek(fptr, 0, SEEK_END);
-            scanner->src_size = ftell(fptr);
-            rewind(fptr);
+                // get size of src file
+                fseek(fptr, 0, SEEK_END);
+                scanner->src_size = ftell(fptr);
+                rewind(fptr);
 
-            // allocate memory for char array and stuff with data
-            scanner->src = (char*)malloc(sizeof(char) * scanner->src_size + 1);
-            fread(scanner->src, 1, scanner->src_size, fptr);
-            scanner->src[scanner->src_size] = '\0';
+                // allocate memory for char array and stuff with data
+                scanner->src = (char*)malloc(sizeof(char) * (scanner->src_size + 1));
+                fread(scanner->src, 1, scanner->src_size, fptr);
+                scanner->src[scanner->src_size] = '\0';
 
-            // init other scanner attributes
-            scanner->tokens = (struct token**)malloc(sizeof(struct token*) * tokens_max);
-            scanner->tokens_amt = 0;
-            scanner->tokens_max = tokens_max;
-            scanner->start = 0;
-            scanner->current = 0;
-            scanner->line = 1;
+                // init other scanner attributes
+                scanner->tokens = (struct token**)malloc(sizeof(struct token*) * tokens_max);
+                scanner->tokens_amt = 0;
+                scanner->tokens_max = tokens_max;
+                scanner->start = 0;
+                scanner->current = 0;
+                scanner->line = 1;
 
-            fclose(fptr);
+                // init cmd line args
+                scanner->tokens_infix = args->tokens_infix;
+                scanner->tokens_postfix = args->tokens_postfix;
 
-        } else {
-            printf("mini: unknown file: '%s'\n", src_path);
+                fclose(fptr);
+
+            } else {
+                printf("mini: unknown file: '%s'\n", args->filename);
+            }
+
         }
-
     }
     
     return scanner;
@@ -280,7 +287,17 @@ void scanner_get_tokens(scanner *scanner) {
         scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, 0, scanner->line);
         scanner->tokens_amt++;
 
+        if (scanner->tokens_infix == 1) {
+            printf("Infix Tokens:\n");
+            _scanner_print_tokens(scanner);
+        }
+
         _scanner_postfix(scanner);
+
+        if (scanner->tokens_postfix == 1) {
+            printf("Postfix Tokens:\n");
+            _scanner_print_tokens(scanner);
+        }
 
     }
 
