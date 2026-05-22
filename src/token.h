@@ -15,7 +15,7 @@ typedef enum token_type {
     MINUS, PLUS, SLASH, STAR, SEMICOLON, RIGHT_PARENTHESES, LEFT_PARENTHESES,
 
     // One or two character tokens
-    EQUAL, EQUAL_EQUAL,
+    EQUAL, EQUAL_EQUAL, NOT_EQUAL,
 
     // Literals
     ID, STRING, INTEGER,

@@ -77,7 +77,9 @@ int token_prec(token *token) {
             case EQUAL: return 0;
             case FUNCTION: return 1;
             case LEFT_PARENTHESES: return 2;
+            case EQUAL_EQUAL:
             case MINUS:
+            case NOT_EQUAL:
             case PLUS:
             case STAR:
             case SLASH:
@@ -112,6 +114,7 @@ void token_print_type(token *token) {
             case LEFT_PARENTHESES: printf("left parentheses\n"); break;
             case EQUAL: printf("equal\n"); break;
             case EQUAL_EQUAL: printf("equal equal\n"); break;
+            case NOT_EQUAL: printf("not equal\n"); break;
             case ID: printf("id\n"); break;
             case STRING: printf("string\n"); break;
             case INTEGER: printf("integer\n"); break;
