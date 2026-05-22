@@ -19,6 +19,8 @@ void _scanner_postfix(scanner *scanner) {
                     case LEFT_PARENTHESES: token_stack_push(token_stack, curr_token); break; // push '(' to stack immediately
                     case RIGHT_PARENTHESES: _scanner_find_left_parentheses(result, token_stack, &j); break; // pop until '(' is found
                     case EQUAL: // operators
+                    case EQUAL_EQUAL:
+                    case NOT_EQUAL:
                     case FUNCTION:
                     case MINUS:
                     case PLUS:
@@ -198,8 +200,13 @@ void _scanner_tokenize(scanner *scanner) {
 
             // one or two character tokens
             case '=':
-                _scanner_add_token(scanner, _scanner_match(scanner, '=') ? EQUAL_EQUAL : EQUAL, scanner->src + scanner->start, 1, 0);
+                if (_scanner_match(scanner, '=') == 0) _scanner_add_token(scanner, EQUAL, scanner->src + scanner->start, 1, 0);
+                else _scanner_add_token(scanner, EQUAL_EQUAL, scanner->src + scanner->start, 2, 0);
                 break;
+            case '!':
+                 if (_scanner_match(scanner, '=') == 0) printf("mini: line %d, Unexpected character '%c'\n", scanner->line, c);
+                 else _scanner_add_token(scanner, NOT_EQUAL, scanner->src + scanner->start, 2, 0);
+                 break;
 
             // literals
             case '"':
@@ -216,7 +223,7 @@ void _scanner_tokenize(scanner *scanner) {
                 } else if (_scanner_is_alpha(c)) {
                     _scanner_identifier(scanner);
                 } else {
-                    printf("Line: %d, Unexpected character '%c'\n", scanner->line, c);
+                    printf("mini: line %d, unexpected character '%c'\n", scanner->line, c);
                 } 
                 break;
         }
