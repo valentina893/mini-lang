@@ -3,10 +3,14 @@
 Interpreted programming language written in C.
 
 Features:
-- 2 data types: integers and strings
+- 3 data types:
+  - Integers
+  - Strings
+  - Booleans (technically just integers)
 - Dynamic typing
 - Variable assignment via `=`
 - Adding and string concatenation via `+`
+- Boolean expressions via `==`
 - Print single variables and primitives via `print()`
 - Read strings from standard input via `input()`
 
