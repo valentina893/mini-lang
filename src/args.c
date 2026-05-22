@@ -43,10 +43,6 @@ args *args_init(int argc, char **argv) {
 
 void args_delete(args *args) {
     if (args != NULL) {
-        if (args->filename != NULL) {
-            free(args->filename);
-            args->filename = NULL;
-        }
         free(args);
         args = NULL;
     }
