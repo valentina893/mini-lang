@@ -1,0 +1,12 @@
+x = 1;
+y = 2;
+bool1 = x == 2;
+print(bool1);
+s = "i love mini-lang";
+bool2 = "i love mini-lang" == s;
+print(bool2);
+bool3 = 1 == "not an int";
+print(bool3);
+s2 = "goodbye";
+bool4 = s2 == "goodbye";
+print(bool4);
