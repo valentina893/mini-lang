@@ -8,6 +8,8 @@
 
 args *args_init(int argc, char **argv) {
     args *args = (struct args*)malloc(sizeof(struct args));
+    args->tokens_infix = 0;
+    args->tokens_postfix = 0;
     args->filename = NULL;
     for (int i = 1; i < argc; i++) {
         // argument
@@ -24,15 +26,12 @@ args *args_init(int argc, char **argv) {
         } 
         // filename
         else {
-            if (strstr(argv[1], ".mini") == NULL) {
-                printf("mini: file '%s' not of type .mini\n", argv[1]);
+            if (strstr(argv[i], ".mini") == NULL) {
+                printf("mini: file '%s' not of type .mini\n", argv[i]);
                 args_delete(args);
                 return NULL;
             }
-            size_t len = strlen(argv[1]);
-            args->filename = (char*)malloc(sizeof(char) * len);
-            strncpy(args->filename, argv[1], len);
-            args->filename[len] = '\0';
+            args->filename = argv[i];
         }
     }
     if (args->filename == NULL) {
@@ -49,5 +48,6 @@ void args_delete(args *args) {
             args->filename = NULL;
         }
         free(args);
+        args = NULL;
     }
 }
