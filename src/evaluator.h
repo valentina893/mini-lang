@@ -57,6 +57,71 @@ Handles assignment to a new variable.
 variable *_evaluator_handle_equal_new(evaluator *evaluator, token *dest, token *src);
 
 /*
+Handles boolean operator == for equality.
+*/
+int _evaluator_handle_equal_equal(evaluator *evaluator);
+
+/*
+Handles boolean operator == for equality where first operand is a variable.
+*/
+int _evaluator_handle_equal_equal_variable(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles boolean operator == between integer variable and another variable.
+*/
+int _evaluator_handle_equal_equal_variable_int_variable(evaluator *evaluator, variable *a_var, token *a, token *b);
+
+/*
+Handles boolean operator == between integer variable and a primitive.
+*/
+int _evaluator_handle_equal_equal_variable_int_primitive(evaluator *evaluator, variable *a_var, token *a, token *b);
+
+/*
+Handles boolean operator == between string variable and another variable.
+*/
+int _evaluator_handle_equal_equal_variable_str_variable(evaluator *evaluator, variable *a_var, token *a, token *b);
+
+/*
+Handles boolean operator == between string variable and a primitive.
+*/
+int _evaluator_handle_equal_equal_variable_str_primitive(evaluator *evaluator, variable *a_var, token *a, token *b);
+
+/*
+Handles boolean operator == where first operand is an integer.
+*/
+int _evaluator_handle_equal_equal_integer(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles boolean operator == between integer and another variable.
+*/
+int _evaluator_handle_equal_equal_integer_variable(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles boolean operator == between integer and a primitive.
+*/
+int _evaluator_handle_equal_equal_integer_primitive(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles boolean operator == where first operand is an string.
+*/
+int _evaluator_handle_equal_equal_string(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles boolean operator == between string and another variable.
+*/
+int _evaluator_handle_equal_equal_string_variable(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles boolean operator == between string and a primitive.
+*/
+int _evaluator_handle_equal_equal_string_primitive(evaluator *evaluator, token *a, token *b);
+
+/*
+Handles boolean operator != for inequality.
+*/
+int _evaluator_handle_not_equal(evaluator *evaluator);
+
+/*
 Handles plus operation, checks if being used arithmetically or for string concatenation.
 */
 int _evaluator_handle_plus(evaluator *evaluator);
