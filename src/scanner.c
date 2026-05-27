@@ -254,7 +254,8 @@ scanner *scanner_init(args *args, int tokens_max) {
 
                 // allocate memory for char array and stuff with data
                 scanner->src = (char*)malloc(sizeof(char) * (scanner->src_size + 1));
-                fread(scanner->src, 1, scanner->src_size, fptr);
+                int res = (int)fread(scanner->src, 1, scanner->src_size, fptr);
+                if (res != scanner->src_size) printf("error calling fread()\n");
                 scanner->src[scanner->src_size] = '\0';
 
                 // init other scanner attributes
