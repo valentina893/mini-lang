@@ -20,7 +20,6 @@ For each token in the postfix tokens array:
 - Else if token is operator, we call the appropriate handler method in the `evaluator` class.
   - Equals:
     - Pop two values b and a from value stack.
-    - Check that a is a defined variable in memory array.
     - Call appropriate handler method in variable class that mutates defined variable.
   - Add:
     - Pop two values b and a from value stack.
