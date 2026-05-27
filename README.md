@@ -10,7 +10,13 @@ print(x);
 ```
 
 For each token in the postfix tokens array:
-- If the token is an operand, we convert to a runtime value and push to a value stack instead of tokens stack.
+- If the token is an operand check the type:
+  - ID: check if variable with same id exists in `memory` array.
+    - If variable exists set value's `variable` pointer to that existing variable.
+    - Else create a new variable in `memory` array and set value's `variable` pointer to new variable.
+    - Push new value to the evaluator's `stack`.
+  - INTEGER: Push value of type `V_INTEGER` to the stack.
+  - STRING: Push value of type `V_STRING` to the stack.
 - Else if token is operator, we call the appropriate handler method in the `evaluator` class.
   - Equals:
     - Pop two values b and a from value stack.
