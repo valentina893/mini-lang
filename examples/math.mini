@@ -1,0 +1,11 @@
+x = 1;
+x = x + 2;
+print(x);
+x = x - 100;
+print(x);
+y = 5;
+x = x / y;
+print(x);
+z = 0;
+x = z * x;
+print(x);
