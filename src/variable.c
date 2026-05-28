@@ -41,8 +41,9 @@ value *value_init_error() {
 }
 
 value *value_copy(value *other) {
+    value *value = NULL;
     if (other != NULL) {
-        value *value = (struct value*)malloc(sizeof(struct value));
+        value = (struct value*)malloc(sizeof(struct value));
         value->type = other->type;
         switch (other->type) {
             case V_INTEGER: 
@@ -55,9 +56,8 @@ value *value_copy(value *other) {
             default:
                 break;
         }
-        return value;
     }
-    return NULL;
+    return value;
 }
 
 void value_delete(value *value) {
@@ -117,12 +117,12 @@ value *value_binary_operation(value *a, value *b, token *op_token) {
     value *a_temp = a;
     value *b_temp = b;
     if (a != NULL && b != NULL && op_token != NULL) {
+        if (b->type == V_VARIABLE) b = b->variable->value;
         // assignment operator
         if (op_token->type == EQUAL) {
             value_equals(a, b);
         } else {
             if (a->type == V_VARIABLE) a = a->variable->value;
-            if (b->type == V_VARIABLE) b = b->variable->value;
             // arithmetic expressions
             if (op_token->type != EQUAL_EQUAL && op_token->type != NOT_EQUAL) {
                 res = value_arithmetic(a, b, op_token);
