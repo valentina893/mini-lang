@@ -10,9 +10,10 @@ int main(int argc, char **argv) {
     if (args != NULL) {
         scanner *scanner = scanner_init(args, token_amt);
         if (scanner != NULL) {
-            scanner_get_tokens(scanner);
-            evaluator *evaluator =  evaluator_init(scanner->tokens_amt, scanner->tokens);
-            evaluator_run(evaluator);
+            if (scanner_get_tokens(scanner) == 1) {
+                evaluator *evaluator =  evaluator_init(scanner->tokens_amt, scanner->tokens);
+                evaluator_run(evaluator);
+            }
             // free evaluator
             //scanner_delete(scanner);
         }
