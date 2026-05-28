@@ -194,7 +194,8 @@ void value_print(value *a) {
 
 value *value_input() {
     char buf[1024];
-    scanf("%s", buf);
+    fgets(buf, sizeof(buf), stdin);
+    buf[strcspn(buf, "\n")] = '\0';
     return value_init_string(strlen(buf), buf);
 }
 
