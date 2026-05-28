@@ -34,7 +34,15 @@ typedef struct scanner {
     int tokens_infix;
     int tokens_postfix;
 
+    // success flag
+    int successful;
+
 } scanner;
+
+/*
+Returns previous character read by scanner.
+*/
+char _scanner_prev(scanner *scanner);
 
 /*
 Converts tokens array from infix to postfix form.
@@ -129,7 +137,7 @@ scanner *scanner_init(args *args, int tokens_max);
 /*
 Fill tokens array by reading content in src.
 */
-void scanner_get_tokens(scanner *scanner);
+int scanner_get_tokens(scanner *scanner);
 
 /*
 Cleans up dynamically allocated memory in scanner class.
