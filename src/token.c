@@ -74,7 +74,8 @@ int token_prec(token *token) {
 
     if (token != NULL) {
         switch (token->type) {
-            case EQUAL: return 0;
+            case EQUAL: 
+            case IF: return 0;
             case EQUAL_EQUAL:
             case MINUS:
             case NOT_EQUAL:
@@ -82,7 +83,8 @@ int token_prec(token *token) {
             case STAR:
             case SLASH: return 1;
             case FUNCTION: return 2;
-            case LEFT_PARENTHESES: return 3;
+            case LEFT_PARENTHESES: 
+            case LEFT_CURLY: return 3;
             default:
                 break;
         }
@@ -109,10 +111,13 @@ void token_print_type(token *token) {
             case SLASH: printf("slash\n"); break;
             case STAR: printf("star\n"); break;
             case SEMICOLON: printf("semicolon\n"); break;
+            case RIGHT_CURLY: printf("right curly\n"); break;
             case RIGHT_PARENTHESES: printf("right parentheses\n"); break;
+            case LEFT_CURLY: printf("left curly\n"); break;
             case LEFT_PARENTHESES: printf("left parentheses\n"); break;
             case EQUAL: printf("equal\n"); break;
             case EQUAL_EQUAL: printf("equal equal\n"); break;
+            case IF: printf("if\n"); break;
             case NOT_EQUAL: printf("not equal\n"); break;
             case ID: printf("id\n"); break;
             case STRING: printf("string\n"); break;
