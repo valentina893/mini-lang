@@ -1,37 +1,25 @@
 # mini-lang
 
-Interpreted programming language written in C.
+This branch is for implementing if-statements in mini-lang.
 
-Features:
-- 3 data types:
-  - Integers
-  - Strings
-  - Booleans (implemented internally as integers)
-- Dynamic typing
-- Variable assignment using the `=` operator
-- Arithmetic expressions for integers
-  - `+` addition 
-  - `-` subtraction
-  - `*` multiplication
-  - `/` division
-- String concatenation using the `+` operator
-- Boolean expressions 
-  - `==` equality
-  - `!=` inequality
-- Console output 
-  - Print variables and literal values using `print()`
-- Standard Input
-  - Read user input from the console using `input()`
-
-See [examples](examples/) for some example mini-lang source code!
-
-Compile with make:
+Example code:
 ```
-make
+x = 1;
+y = 0;
+if x == 1 {
+  y = x;
+}
+print(y);
 ```
 
-Run as such:
+Expected output:
 ```
-./mini file.mini
+1
 ```
 
+To-do:
+- Token
+  - Create token types for `if`, `{`, and `}`
+  - Update `token_prec()` and `token_print_type()`
+- Scanner
+  - Update `_scanner_tokenize()` and `_scanner_postfix()` 
