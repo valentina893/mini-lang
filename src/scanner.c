@@ -24,7 +24,7 @@ void _scanner_postfix(scanner *scanner) {
                     case INTEGER:
                     case STRING: result[j] = curr_token; j++; break;
                     case LEFT_PARENTHESES: token_stack_push(token_stack, curr_token); break; // push '(' to stack immediately
-                    case RIGHT_PARENTHESES: _scanner_find_left_parentheses(result, token_stack, &j); break; // pop until '(' is found
+                    case RIGHT_PARENTHESES: _scanner_find_left_parentheses(&result, token_stack, &j); break; // pop until '(' is found
                     case EQUAL: // operators
                     case EQUAL_EQUAL:
                     case NOT_EQUAL:
@@ -46,9 +46,9 @@ void _scanner_postfix(scanner *scanner) {
     }
 }
 
-void _scanner_find_left_parentheses(token** result, token_stack *token_stack, int *j) {
+void _scanner_find_left_parentheses(token ***result, token_stack *token_stack, int *j) {
     while (token_stack_is_empty(token_stack) == 0 && token_stack_top(token_stack)->type != LEFT_PARENTHESES) {
-        result[*j++] = token_stack_pop(token_stack);
+        (*result)[(*j)++] = token_stack_pop(token_stack);
     } 
     token_stack_pop(token_stack);
 }
