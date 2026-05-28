@@ -128,7 +128,7 @@ void _scanner_string(scanner *scanner) {
             return;
         }
 
-        printf("Line: %d:%d, Unterminated string\n", scanner->line, scanner->current);
+        printf("mini: line %d, unterminated string\n", scanner->line);
 
     }
 
@@ -194,9 +194,9 @@ void _scanner_tokenize(scanner *scanner) {
             case '+': _scanner_add_token(scanner, PLUS, scanner->src + scanner->start, 1, 0); break;
             case '/': _scanner_add_token(scanner, SLASH, scanner->src + scanner->start, 1, 0); break;
             case '*': _scanner_add_token(scanner, STAR, scanner->src + scanner->start, 1, 0); break;
-            case ';': _scanner_add_token(scanner, SEMICOLON, scanner->src + scanner->start, 1, 0); break;
             case ')': _scanner_add_token(scanner, RIGHT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
             case '(': _scanner_add_token(scanner, LEFT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
+            case ';': _scanner_add_token(scanner, SEMICOLON, scanner->src + scanner->start, 1, 0); break;
 
             // one or two character tokens
             case '=':
@@ -204,7 +204,7 @@ void _scanner_tokenize(scanner *scanner) {
                 else _scanner_add_token(scanner, EQUAL_EQUAL, scanner->src + scanner->start, 2, 0);
                 break;
             case '!':
-                 if (_scanner_match(scanner, '=') == 0) printf("mini: line %d, Unexpected character '%c'\n", scanner->line, c);
+                 if (_scanner_match(scanner, '=') == 0) printf("mini: line %d, unexpected character '%c'\n", scanner->line, c);
                  else _scanner_add_token(scanner, NOT_EQUAL, scanner->src + scanner->start, 2, 0);
                  break;
 
@@ -254,21 +254,31 @@ scanner *scanner_init(args *args, int tokens_max) {
 
                 // allocate memory for char array and stuff with data
                 scanner->src = (char*)malloc(sizeof(char) * (scanner->src_size + 1));
-                int res = (int)fread(scanner->src, 1, scanner->src_size, fptr);
-                if (res != scanner->src_size) printf("error calling fread()\n");
-                scanner->src[scanner->src_size] = '\0';
+                long res = (int)fread(scanner->src, 1, scanner->src_size, fptr);
+                
+                if (res == scanner->src_size) {
+                    
+                    scanner->src[scanner->src_size] = '\0';
 
-                // init other scanner attributes
-                scanner->tokens = (struct token**)malloc(sizeof(struct token*) * tokens_max);
-                scanner->tokens_amt = 0;
-                scanner->tokens_max = tokens_max;
-                scanner->start = 0;
-                scanner->current = 0;
-                scanner->line = 1;
+                    // init other scanner attributes
+                    scanner->tokens = (struct token**)malloc(sizeof(struct token*) * tokens_max);
+                    scanner->tokens_amt = 0;
+                    scanner->tokens_max = tokens_max;
+                    scanner->start = 0;
+                    scanner->current = 0;
+                    scanner->line = 1;
 
-                // init cmd line args
-                scanner->tokens_infix = args->tokens_infix;
-                scanner->tokens_postfix = args->tokens_postfix;
+                    // init cmd line args
+                    scanner->tokens_infix = args->tokens_infix;
+                    scanner->tokens_postfix = args->tokens_postfix;
+
+                } else {
+                    printf("mini: error reading contents of %s into buffer\n", args->filename);
+                    free(scanner->src);
+                    scanner->src = NULL;
+                    free(scanner);
+                    scanner = NULL;
+                }
 
                 fclose(fptr);
 
