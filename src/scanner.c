@@ -4,6 +4,13 @@
 
 #include "scanner.h"
 
+char _scanner_prev(scanner *scanner) {
+    if (scanner != NULL && scanner->current > 0) {
+        return scanner->src[scanner->current - 2];
+    }
+    return '\0';
+}
+
 void _scanner_postfix(scanner *scanner) {
     if (scanner != NULL) {
         token_stack *token_stack = token_stack_init(scanner->tokens_amt);
@@ -17,7 +24,7 @@ void _scanner_postfix(scanner *scanner) {
                     case INTEGER:
                     case STRING: result[j] = curr_token; j++; break;
                     case LEFT_PARENTHESES: token_stack_push(token_stack, curr_token); break; // push '(' to stack immediately
-                    case RIGHT_PARENTHESES: _scanner_find_left_parentheses(result, token_stack, &j); break; // pop until '(' is found
+                    case RIGHT_PARENTHESES: _scanner_find_left_parentheses(&result, token_stack, &j); break; // pop until '(' is found
                     case EQUAL: // operators
                     case EQUAL_EQUAL:
                     case NOT_EQUAL:
@@ -39,9 +46,9 @@ void _scanner_postfix(scanner *scanner) {
     }
 }
 
-void _scanner_find_left_parentheses(token** result, token_stack *token_stack, int *j) {
+void _scanner_find_left_parentheses(token ***result, token_stack *token_stack, int *j) {
     while (token_stack_is_empty(token_stack) == 0 && token_stack_top(token_stack)->type != LEFT_PARENTHESES) {
-        result[*j++] = token_stack_pop(token_stack);
+        (*result)[(*j)++] = token_stack_pop(token_stack);
     } 
     token_stack_pop(token_stack);
 }
@@ -113,6 +120,8 @@ void _scanner_string(scanner *scanner) {
 
     if (scanner != NULL) {
 
+        int beginning = scanner->line;
+
         // consume each character until current is next to terminating "
         while (_scanner_peek(scanner) != '\"' && _scanner_at_end(scanner) == 0) {
             if (_scanner_peek(scanner) == '\n') scanner->line++;
@@ -128,7 +137,8 @@ void _scanner_string(scanner *scanner) {
             return;
         }
 
-        printf("Line: %d:%d, Unterminated string\n", scanner->line, scanner->current);
+        printf("mini: line %d, unterminated string\n", beginning);
+        scanner->successful = 0;
 
     }
 
@@ -141,19 +151,22 @@ int _scanner_is_digit(char c) {
     return 0;
 }
 
-void _scanner_integer(scanner *scanner) {
+void _scanner_integer(scanner *scanner, int negative) {
     if (scanner != NULL) {
         // consume all digit characters
         while (_scanner_is_digit(_scanner_peek(scanner))) {
             _scanner_advance(scanner);
         }
+        if (negative == 1) scanner->start += 1;
         const int length = scanner->current - scanner->start;
         char *value_start = scanner->src + scanner->start;
         // evaluate the literal
         char literal_buf[length];
         strncpy(literal_buf, value_start, length);
         literal_buf[length] = '\0';
-        _scanner_add_token(scanner, INTEGER, value_start, length, atoi(literal_buf));
+        int literal = atoi(literal_buf);
+        if (negative == 1) literal *= -1;
+        _scanner_add_token(scanner, INTEGER, value_start, length, literal);
     }
 }
 
@@ -190,13 +203,12 @@ void _scanner_tokenize(scanner *scanner) {
 
         switch (c) {
             // single character tokens
-            case '-': _scanner_add_token(scanner, MINUS, scanner->src + scanner->start, 1, 0); break;
             case '+': _scanner_add_token(scanner, PLUS, scanner->src + scanner->start, 1, 0); break;
             case '/': _scanner_add_token(scanner, SLASH, scanner->src + scanner->start, 1, 0); break;
             case '*': _scanner_add_token(scanner, STAR, scanner->src + scanner->start, 1, 0); break;
-            case ';': _scanner_add_token(scanner, SEMICOLON, scanner->src + scanner->start, 1, 0); break;
             case ')': _scanner_add_token(scanner, RIGHT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
             case '(': _scanner_add_token(scanner, LEFT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
+            case ';': _scanner_add_token(scanner, SEMICOLON, scanner->src + scanner->start, 1, 0); break;
 
             // one or two character tokens
             case '=':
@@ -204,26 +216,38 @@ void _scanner_tokenize(scanner *scanner) {
                 else _scanner_add_token(scanner, EQUAL_EQUAL, scanner->src + scanner->start, 2, 0);
                 break;
             case '!':
-                 if (_scanner_match(scanner, '=') == 0) printf("mini: line %d, Unexpected character '%c'\n", scanner->line, c);
+                 if (_scanner_match(scanner, '=') == 0) {
+                    printf("mini: line %d, unexpected character '%c'\n", scanner->line, c);
+                    scanner->successful = 0;
+                 }
                  else _scanner_add_token(scanner, NOT_EQUAL, scanner->src + scanner->start, 2, 0);
                  break;
 
             // literals
-            case '"':
-                _scanner_string(scanner);
-                break;
+            case '"': _scanner_string(scanner); break;
+            case '-':
+                 if (_scanner_is_digit(_scanner_peek(scanner)) == 1) _scanner_integer(scanner, 1);
+                 else _scanner_add_token(scanner, MINUS, scanner->src + scanner->start, 1, 0);
+                 break;
 
             // ignore whitespaces and newlines
             case ' ': break;
-            case '\n': scanner->line++; break;
+            case '\n':
+                if (_scanner_prev(scanner) != ';') {
+                    printf("mini: line %d, missing semicolon\n", scanner->line);
+                    scanner->successful = 0;
+                }
+                scanner->line++;
+                break;
             
             default:
                 if (_scanner_is_digit(c)) {
-                    _scanner_integer(scanner);
+                    _scanner_integer(scanner, 0);
                 } else if (_scanner_is_alpha(c)) {
                     _scanner_identifier(scanner);
                 } else {
                     printf("mini: line %d, unexpected character '%c'\n", scanner->line, c);
+                    scanner->successful = 0;
                 } 
                 break;
         }
@@ -254,20 +278,32 @@ scanner *scanner_init(args *args, int tokens_max) {
 
                 // allocate memory for char array and stuff with data
                 scanner->src = (char*)malloc(sizeof(char) * (scanner->src_size + 1));
-                fread(scanner->src, 1, scanner->src_size, fptr);
-                scanner->src[scanner->src_size] = '\0';
+                long res = (int)fread(scanner->src, 1, scanner->src_size, fptr);
+                
+                if (res == scanner->src_size) {
+                    
+                    scanner->src[scanner->src_size] = '\0';
 
-                // init other scanner attributes
-                scanner->tokens = (struct token**)malloc(sizeof(struct token*) * tokens_max);
-                scanner->tokens_amt = 0;
-                scanner->tokens_max = tokens_max;
-                scanner->start = 0;
-                scanner->current = 0;
-                scanner->line = 1;
+                    // init other scanner attributes
+                    scanner->tokens = (struct token**)malloc(sizeof(struct token*) * tokens_max);
+                    scanner->tokens_amt = 0;
+                    scanner->tokens_max = tokens_max;
+                    scanner->start = 0;
+                    scanner->current = 0;
+                    scanner->line = 1;
+                    scanner->successful = 1;
 
-                // init cmd line args
-                scanner->tokens_infix = args->tokens_infix;
-                scanner->tokens_postfix = args->tokens_postfix;
+                    // init cmd line args
+                    scanner->tokens_infix = args->tokens_infix;
+                    scanner->tokens_postfix = args->tokens_postfix;
+
+                } else {
+                    printf("mini: error reading contents of %s into buffer\n", args->filename);
+                    free(scanner->src);
+                    scanner->src = NULL;
+                    free(scanner);
+                    scanner = NULL;
+                }
 
                 fclose(fptr);
 
@@ -282,7 +318,7 @@ scanner *scanner_init(args *args, int tokens_max) {
 
 }
 
-void scanner_get_tokens(scanner *scanner) {
+int scanner_get_tokens(scanner *scanner) {
 
     if (scanner != NULL) {
 
@@ -294,19 +330,24 @@ void scanner_get_tokens(scanner *scanner) {
         scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, 0, scanner->line);
         scanner->tokens_amt++;
 
-        if (scanner->tokens_infix == 1) {
-            printf("Infix Tokens:\n");
-            _scanner_print_tokens(scanner);
-        }
+        if (scanner->successful == 1) {
+            if (scanner->tokens_infix == 1) {
+                printf("Infix Tokens:\n");
+                _scanner_print_tokens(scanner);
+            }
 
-        _scanner_postfix(scanner);
+            _scanner_postfix(scanner);
 
-        if (scanner->tokens_postfix == 1) {
-            printf("Postfix Tokens:\n");
-            _scanner_print_tokens(scanner);
+            if (scanner->tokens_postfix == 1) {
+                printf("Postfix Tokens:\n");
+                _scanner_print_tokens(scanner);
+            }
+
+            return 1;
         }
 
     }
+    return 0;
 
 }
 

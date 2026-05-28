@@ -6,15 +6,24 @@ Features:
 - 3 data types:
   - Integers
   - Strings
-  - Booleans (technically just integers)
+  - Booleans (implemented internally as integers)
 - Dynamic typing
-- Variable assignment via `=`
-- Adding and string concatenation via `+`
-- Boolean expressions via `==`
-- Print single variables and primitives via `print()`
-- Read strings from standard input via `input()`
+- Variable assignment using the `=` operator
+- Arithmetic expressions for integers
+  - `+` addition 
+  - `-` subtraction
+  - `*` multiplication
+  - `/` division
+- String concatenation using the `+` operator
+- Boolean expressions 
+  - `==` equality
+  - `!=` inequality
+- Console output 
+  - Print variables and literal values using `print()`
+- Standard Input
+  - Read user input from the console using `input()`
 
-See [Examples](examples/) for some example mini-lang source code!
+See [examples](examples/) for some example mini-lang source code!
 
 Compile with make:
 ```
@@ -25,3 +34,4 @@ Run as such:
 ```
 ./mini file.mini
 ```
+

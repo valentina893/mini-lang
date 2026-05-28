@@ -1,3 +1,4 @@
-x = "will this work?";
+x = "will this work?"
+y = ?x;
 print(x);
 print(y);

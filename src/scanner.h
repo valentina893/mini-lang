@@ -34,7 +34,15 @@ typedef struct scanner {
     int tokens_infix;
     int tokens_postfix;
 
+    // success flag
+    int successful;
+
 } scanner;
+
+/*
+Returns previous character read by scanner.
+*/
+char _scanner_prev(scanner *scanner);
 
 /*
 Converts tokens array from infix to postfix form.
@@ -44,7 +52,7 @@ void _scanner_postfix(scanner *scanner);
 /*
 Pops operators out of token stack and appends to postfix array until '(' is found.
 */
-void _scanner_find_left_parentheses(token** result, token_stack *token_stack, int *j);
+void _scanner_find_left_parentheses(token ***result, token_stack *token_stack, int *j);
 
 /*
 Pops operators from token stack until current token has lower precedence than top. Current token is then pushed to stack.
@@ -97,9 +105,9 @@ Returns 1 if character c is numerical digit 1-9, otherwise returns 0.
 int _scanner_is_digit(char c);
 
 /*
-Called once we read a digit character (0-9).
+Called once we read a digit character (0-9). Pass in 1 for negative if the number is negative.
 */
-void _scanner_integer(scanner *scanner);
+void _scanner_integer(scanner *scanner, int negative);
 
 /*
 Returns 1 if character c is an alphabetic character, otherwise returns 0.
@@ -129,7 +137,7 @@ scanner *scanner_init(args *args, int tokens_max);
 /*
 Fill tokens array by reading content in src.
 */
-void scanner_get_tokens(scanner *scanner);
+int scanner_get_tokens(scanner *scanner);
 
 /*
 Cleans up dynamically allocated memory in scanner class.

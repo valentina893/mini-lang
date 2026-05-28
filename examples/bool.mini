@@ -1,6 +1,6 @@
 x = 1;
 y = 2;
-bool1 = x == 2;
+bool1 = x != 2;
 print(bool1);
 s = "i love mini-lang";
 bool2 = "i love mini-lang" == s;
