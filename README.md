@@ -6,7 +6,7 @@ Features:
 - 3 data types:
   - Integers
   - Strings
-  - Booleans (technically just integers)
+  - Booleans (implemented internally as integers)
 - Dynamic typing
 - Variable assignment using the `=` operator
 - Arithmetic expressions for integers
