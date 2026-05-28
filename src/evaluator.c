@@ -109,7 +109,7 @@ int _evaluator_handle_binary_operation(evaluator *evaluator, token *curr_token) 
 }
 
 int _evaluator_handle_function(evaluator *evaluator, token *curr_token) {
-    if (evaluator != NULL) {
+    if (evaluator != NULL && curr_token != NULL) {
         if (strcmp(curr_token->lexeme, "print") == 0) {
             value *a = value_stack_pop(evaluator->stack);
             value_print(a);
