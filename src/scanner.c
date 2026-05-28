@@ -120,6 +120,8 @@ void _scanner_string(scanner *scanner) {
 
     if (scanner != NULL) {
 
+        int beginning = scanner->line;
+
         // consume each character until current is next to terminating "
         while (_scanner_peek(scanner) != '\"' && _scanner_at_end(scanner) == 0) {
             if (_scanner_peek(scanner) == '\n') scanner->line++;
@@ -135,7 +137,8 @@ void _scanner_string(scanner *scanner) {
             return;
         }
 
-        printf("mini: line %d, unterminated string\n", scanner->line);
+        printf("mini: line %d, unterminated string\n", beginning);
+        scanner->successful = 0;
 
     }
 
