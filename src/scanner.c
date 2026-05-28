@@ -151,19 +151,22 @@ int _scanner_is_digit(char c) {
     return 0;
 }
 
-void _scanner_integer(scanner *scanner) {
+void _scanner_integer(scanner *scanner, int negative) {
     if (scanner != NULL) {
         // consume all digit characters
         while (_scanner_is_digit(_scanner_peek(scanner))) {
             _scanner_advance(scanner);
         }
+        if (negative == 1) scanner->start += 1;
         const int length = scanner->current - scanner->start;
         char *value_start = scanner->src + scanner->start;
         // evaluate the literal
         char literal_buf[length];
         strncpy(literal_buf, value_start, length);
         literal_buf[length] = '\0';
-        _scanner_add_token(scanner, INTEGER, value_start, length, atoi(literal_buf));
+        int literal = atoi(literal_buf);
+        if (negative == 1) literal *= -1;
+        _scanner_add_token(scanner, INTEGER, value_start, length, literal);
     }
 }
 
@@ -200,7 +203,6 @@ void _scanner_tokenize(scanner *scanner) {
 
         switch (c) {
             // single character tokens
-            case '-': _scanner_add_token(scanner, MINUS, scanner->src + scanner->start, 1, 0); break;
             case '+': _scanner_add_token(scanner, PLUS, scanner->src + scanner->start, 1, 0); break;
             case '/': _scanner_add_token(scanner, SLASH, scanner->src + scanner->start, 1, 0); break;
             case '*': _scanner_add_token(scanner, STAR, scanner->src + scanner->start, 1, 0); break;
@@ -223,6 +225,10 @@ void _scanner_tokenize(scanner *scanner) {
 
             // literals
             case '"': _scanner_string(scanner); break;
+            case '-':
+                 if (_scanner_is_digit(_scanner_peek(scanner)) == 1) _scanner_integer(scanner, 1);
+                 else _scanner_add_token(scanner, MINUS, scanner->src + scanner->start, 1, 0);
+                 break;
 
             // ignore whitespaces and newlines
             case ' ': break;
@@ -236,7 +242,7 @@ void _scanner_tokenize(scanner *scanner) {
             
             default:
                 if (_scanner_is_digit(c)) {
-                    _scanner_integer(scanner);
+                    _scanner_integer(scanner, 0);
                 } else if (_scanner_is_alpha(c)) {
                     _scanner_identifier(scanner);
                 } else {

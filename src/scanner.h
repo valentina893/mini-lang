@@ -105,9 +105,9 @@ Returns 1 if character c is numerical digit 1-9, otherwise returns 0.
 int _scanner_is_digit(char c);
 
 /*
-Called once we read a digit character (0-9).
+Called once we read a digit character (0-9). Pass in 1 for negative if the number is negative.
 */
-void _scanner_integer(scanner *scanner);
+void _scanner_integer(scanner *scanner, int negative);
 
 /*
 Returns 1 if character c is an alphabetic character, otherwise returns 0.
