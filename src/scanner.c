@@ -4,6 +4,13 @@
 
 #include "scanner.h"
 
+char _scanner_prev(scanner *scanner) {
+    if (scanner != NULL && scanner->current > 0) {
+        return scanner->src[scanner->current - 2];
+    }
+    return '\0';
+}
+
 void _scanner_postfix(scanner *scanner) {
     if (scanner != NULL) {
         token_stack *token_stack = token_stack_init(scanner->tokens_amt);
@@ -204,18 +211,25 @@ void _scanner_tokenize(scanner *scanner) {
                 else _scanner_add_token(scanner, EQUAL_EQUAL, scanner->src + scanner->start, 2, 0);
                 break;
             case '!':
-                 if (_scanner_match(scanner, '=') == 0) printf("mini: line %d, unexpected character '%c'\n", scanner->line, c);
+                 if (_scanner_match(scanner, '=') == 0) {
+                    printf("mini: line %d, unexpected character '%c'\n", scanner->line, c);
+                    scanner->successful = 0;
+                 }
                  else _scanner_add_token(scanner, NOT_EQUAL, scanner->src + scanner->start, 2, 0);
                  break;
 
             // literals
-            case '"':
-                _scanner_string(scanner);
-                break;
+            case '"': _scanner_string(scanner); break;
 
             // ignore whitespaces and newlines
             case ' ': break;
-            case '\n': scanner->line++; break;
+            case '\n':
+                if (_scanner_prev(scanner) != ';') {
+                    printf("mini: line %d, missing semicolon\n", scanner->line);
+                    scanner->successful = 0;
+                }
+                scanner->line++;
+                break;
             
             default:
                 if (_scanner_is_digit(c)) {
@@ -224,6 +238,7 @@ void _scanner_tokenize(scanner *scanner) {
                     _scanner_identifier(scanner);
                 } else {
                     printf("mini: line %d, unexpected character '%c'\n", scanner->line, c);
+                    scanner->successful = 0;
                 } 
                 break;
         }
@@ -267,6 +282,7 @@ scanner *scanner_init(args *args, int tokens_max) {
                     scanner->start = 0;
                     scanner->current = 0;
                     scanner->line = 1;
+                    scanner->successful = 1;
 
                     // init cmd line args
                     scanner->tokens_infix = args->tokens_infix;
@@ -293,7 +309,7 @@ scanner *scanner_init(args *args, int tokens_max) {
 
 }
 
-void scanner_get_tokens(scanner *scanner) {
+int scanner_get_tokens(scanner *scanner) {
 
     if (scanner != NULL) {
 
@@ -305,19 +321,24 @@ void scanner_get_tokens(scanner *scanner) {
         scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, 0, scanner->line);
         scanner->tokens_amt++;
 
-        if (scanner->tokens_infix == 1) {
-            printf("Infix Tokens:\n");
-            _scanner_print_tokens(scanner);
-        }
+        if (scanner->successful == 1) {
+            if (scanner->tokens_infix == 1) {
+                printf("Infix Tokens:\n");
+                _scanner_print_tokens(scanner);
+            }
 
-        _scanner_postfix(scanner);
+            _scanner_postfix(scanner);
 
-        if (scanner->tokens_postfix == 1) {
-            printf("Postfix Tokens:\n");
-            _scanner_print_tokens(scanner);
+            if (scanner->tokens_postfix == 1) {
+                printf("Postfix Tokens:\n");
+                _scanner_print_tokens(scanner);
+            }
+
+            return 1;
         }
 
     }
+    return 0;
 
 }
 
