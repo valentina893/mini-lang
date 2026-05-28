@@ -100,10 +100,14 @@ int _evaluator_handle_binary_operation(evaluator *evaluator, token *curr_token) 
         // pop two values from stack
         value *b = value_stack_pop(evaluator->stack);
         value *a = value_stack_pop(evaluator->stack);
-        value_stack_push(evaluator->stack, value_binary_operation(a, b, curr_token));
-        value_delete(b);
-        value_delete(a);
-        return 1;
+        if (b != NULL) {
+            if (a != NULL) {
+                value_stack_push(evaluator->stack, value_binary_operation(a, b, curr_token));
+                value_delete(b);
+                value_delete(a);
+                return 1;
+            }
+        }
     }
     return 0;
 }
