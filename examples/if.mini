@@ -7,3 +7,12 @@ if guess == answer {
 if guess != answer {
     print("incorrect!");
 }
+answer = "cool";
+print("guess the word i'm thinking of...");
+guess = input();
+if guess == answer {
+    print("correct!");
+}
+if guess != answer {
+    print("incorrect!");
+}
