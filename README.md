@@ -1,11 +1,11 @@
 # mini-lang
 
-This branch is for implementing if-statements in mini-lang.
+This branch is for adding conditional control flow to mini-lang.
 
 What currently works:
-- Non-nested if-statements
+- Single branch if-statements
+- Nested if-statements
 
 To-do:
 - Add support for the following:
-  - Nested if-statements
   - Else-if and else statements
