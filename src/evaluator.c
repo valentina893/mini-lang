@@ -7,6 +7,7 @@
 
 evaluator *evaluator_init(int tokens_amt, token **tokens) {
     evaluator *evaluator = (struct evaluator*)malloc(sizeof(struct evaluator));
+    evaluator->tokens_idx = 0;
     evaluator->tokens_amt = tokens_amt - 1;
     evaluator->variable_amt = 0;
     evaluator->tokens = tokens;
@@ -18,14 +19,15 @@ evaluator *evaluator_init(int tokens_amt, token **tokens) {
 
 void evaluator_run(evaluator *evaluator) {
     int exit = 0;
-    for (int i = 0; i < evaluator->tokens_amt; i++) {
-        token *curr_token = evaluator->tokens[i];
+    for (evaluator->tokens_idx = 0; evaluator->tokens_idx < evaluator->tokens_amt; evaluator->tokens_idx++) {
+        token *curr_token = evaluator->tokens[evaluator->tokens_idx];
         switch (curr_token->type) {
             case ID:
             case INTEGER:
             case STRING:
                 if (_evaluator_handle_operand(evaluator, curr_token) == 0) exit = 1;
                 break;
+            case RIGHT_CURLY: continue;
             default:
                 if (_evaluator_handle_operator(evaluator, curr_token) == 0) exit = 1;
                 break;
@@ -75,6 +77,10 @@ int _evaluator_handle_operand(evaluator *evaluator, token *curr_token) {
 
 int _evaluator_handle_operator(evaluator *evaluator, token *curr_token) {
     switch (curr_token->type) {
+        // unary operations
+        case IF:
+            return _evaluator_handle_unary_operation(evaluator, curr_token);
+            break;
         // binary operations
         case EQUAL:
         case EQUAL_EQUAL:
@@ -122,6 +128,27 @@ int _evaluator_handle_function(evaluator *evaluator, token *curr_token) {
             value_stack_push(evaluator->stack, value_input());
         }
         return 1;
+    }
+    return 0;
+}
+
+int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
+    if (evaluator != NULL && curr_token != NULL) {
+        value *a = value_stack_pop(evaluator->stack);
+        if (a != NULL) {
+            value *res = value_unary_operation(a, curr_token);
+            // check if if-statement was successful
+            if (curr_token->type == IF && res != NULL) {
+                // jump past next '}' if if-statement was false.
+                if (res->integer == 0) {
+                    while (curr_token->type != RIGHT_CURLY) {
+                        curr_token = evaluator->tokens[++evaluator->tokens_idx];
+                    }
+                }
+                value_delete(a);
+                return 1;
+            }
+        }
     }
     return 0;
 }
