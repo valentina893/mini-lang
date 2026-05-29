@@ -138,6 +138,21 @@ value *value_binary_operation(value *a, value *b, token *op_token) {
     return res;
 }
 
+value *value_unary_operation(value *val, token *op_token) {
+    value *res = NULL;
+    value *val_temp = val;
+    if (val != NULL && op_token != NULL) {
+        if (val->type == V_VARIABLE) val = val->variable->value;
+        if (op_token->type == IF) {
+            if (val->type == V_INTEGER) {
+                res = value_init_int(val->integer);
+            }
+        }
+        val = val_temp;
+    }
+    return res;
+}
+
 value *value_boolean(value *a, value *b, token *op_token) {
     value *res = NULL;
     if (a != NULL && b != NULL && op_token != NULL) {
