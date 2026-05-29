@@ -19,7 +19,7 @@ evaluator *evaluator_init(int tokens_amt, token **tokens) {
 
 void evaluator_run(evaluator *evaluator) {
     int exit = 0;
-    for (evaluator->tokens_idx = 0; evaluator->tokens_idx < evaluator->tokens_amt; evaluator->tokens_idx++) {
+    for (; evaluator->tokens_idx < evaluator->tokens_amt; evaluator->tokens_idx++) {
         token *curr_token = evaluator->tokens[evaluator->tokens_idx];
         switch (curr_token->type) {
             case ID:
