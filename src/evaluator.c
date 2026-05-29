@@ -141,8 +141,15 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
             if (curr_token->type == IF && res != NULL) {
                 // jump past next '}' if if-statement was false.
                 if (res->integer == 0) {
-                    while (curr_token->type != RIGHT_CURLY) {
-                        curr_token = evaluator->tokens[++evaluator->tokens_idx];
+                    int if_depth = curr_token->literal;
+                    // search for right curly brace with equal depth to if token
+                    for (; evaluator->tokens_idx < evaluator->tokens_amt; evaluator->tokens_idx++) {
+                        curr_token = evaluator->tokens[evaluator->tokens_idx];
+                        if (curr_token->type == RIGHT_CURLY) {
+                            if (curr_token->literal == if_depth) {
+                                break;
+                            }
+                        }
                     }
                 }
                 value_delete(a);
