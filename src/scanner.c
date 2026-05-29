@@ -36,7 +36,7 @@ void _scanner_postfix(scanner *scanner) {
                     case STAR: _scanner_handle_operator(result, token_stack, curr_token, &j); break; // pop lower/equal tokens from stack
                     case SEMICOLON: 
                     case LEFT_CURLY: while (token_stack_is_empty(token_stack) == 0) {result[j++] = token_stack_pop(token_stack);} break; // pop remaining operators
-                    case RIGHT_CURLY: result[j++] = curr_token;
+                    case RIGHT_CURLY: result[j++] = curr_token; break;
                     default: break;
                 }
             }
@@ -197,7 +197,7 @@ void _scanner_identifier(scanner *scanner) {
         else if (strncmp(value_start, "if", length) == 0) {
             // should be 'if' following by whitespace
             if (_scanner_peek(scanner) == ' ') {
-                _scanner_add_token(scanner, IF, value_start, length, 0);
+                _scanner_add_token(scanner, IF, value_start, length, scanner->depth++);
             } else {
                 printf("mini: line %d, incorrect if-statement syntax\n", scanner->line);
             }
@@ -219,7 +219,7 @@ void _scanner_tokenize(scanner *scanner) {
             case '+': _scanner_add_token(scanner, PLUS, scanner->src + scanner->start, 1, 0); break;
             case '/': _scanner_add_token(scanner, SLASH, scanner->src + scanner->start, 1, 0); break;
             case '*': _scanner_add_token(scanner, STAR, scanner->src + scanner->start, 1, 0); break;
-            case '}': _scanner_add_token(scanner, RIGHT_CURLY, scanner->src + scanner->start, 1, 0); break;
+            case '}': _scanner_add_token(scanner, RIGHT_CURLY, scanner->src + scanner->start, 1, --scanner->depth); break;
             case ')': _scanner_add_token(scanner, RIGHT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
             case '{': _scanner_add_token(scanner, LEFT_CURLY, scanner->src + scanner->start, 1, 0); break;
             case '(': _scanner_add_token(scanner, LEFT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
@@ -306,6 +306,7 @@ scanner *scanner_init(args *args, int tokens_max) {
                     scanner->start = 0;
                     scanner->current = 0;
                     scanner->line = 1;
+                    scanner->depth = 0;
                     scanner->successful = 1;
 
                     // init cmd line args
