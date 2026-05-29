@@ -29,6 +29,8 @@ typedef struct scanner {
     int current;
     // current line in src code being read
     int line;
+    // current depth for if-statements;
+    int depth;
 
     // scanner args
     int tokens_infix;
