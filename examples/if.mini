@@ -3,16 +3,21 @@ print("guess the number i'm thinking of...");
 guess = input();
 if guess == answer {
     print("correct!");
+    print("keep playing? y/n");
+    choice = input();
+    if choice == "y" {
+        print("guess again!");
+        answer2 = "50";
+        guess2 = input();
+        if guess2 == answer2 {
+            print("correct again!");
+        }
+        if guess2 != answer2 {
+            print("incorrect this time!");
+        }
+    }
 }
 if guess != answer {
     print("incorrect!");
 }
-answer = "cool";
-print("guess the word i'm thinking of...");
-guess = input();
-if guess == answer {
-    print("correct!");
-}
-if guess != answer {
-    print("incorrect!");
-}
+print("thanks for playing!");
