@@ -189,7 +189,17 @@ void _scanner_identifier(scanner *scanner) {
         // check if identifier is function call
         if (_scanner_peek(scanner) == '(') {
             _scanner_add_token(scanner, FUNCTION, value_start, length, 0);
-        } else {
+        }
+        // check if identifier is keyword 'if'
+        else if (strncmp(value_start, "if", length) == 0) {
+            // should be 'if' following by whitespace
+            if (_scanner_peek(scanner) == ' ') {
+                _scanner_add_token(scanner, IF, value_start, length, 0);
+            } else {
+                printf("mini: line %d, incorrect if-statement syntax\n", scanner->line);
+            }
+        }
+        else {
             _scanner_add_token(scanner, ID, value_start, length, 0);
         }
     }
@@ -206,7 +216,9 @@ void _scanner_tokenize(scanner *scanner) {
             case '+': _scanner_add_token(scanner, PLUS, scanner->src + scanner->start, 1, 0); break;
             case '/': _scanner_add_token(scanner, SLASH, scanner->src + scanner->start, 1, 0); break;
             case '*': _scanner_add_token(scanner, STAR, scanner->src + scanner->start, 1, 0); break;
+            case '}': _scanner_add_token(scanner, RIGHT_CURLY, scanner->src + scanner->start, 1, 0); break;
             case ')': _scanner_add_token(scanner, RIGHT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
+            case '{': _scanner_add_token(scanner, LEFT_CURLY, scanner->src + scanner->start, 1, 0); break;
             case '(': _scanner_add_token(scanner, LEFT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
             case ';': _scanner_add_token(scanner, SEMICOLON, scanner->src + scanner->start, 1, 0); break;
 
@@ -233,8 +245,8 @@ void _scanner_tokenize(scanner *scanner) {
             // ignore whitespaces and newlines
             case ' ': break;
             case '\n':
-                if (_scanner_prev(scanner) != ';') {
-                    printf("mini: line %d, missing semicolon\n", scanner->line);
+                if (_scanner_prev(scanner) != ';' && _scanner_prev(scanner) != '{' && _scanner_prev(scanner) != '}') {
+                    printf("mini: line %d, missing semicolon or curly brace\n", scanner->line);
                     scanner->successful = 0;
                 }
                 scanner->line++;
@@ -325,6 +337,13 @@ int scanner_get_tokens(scanner *scanner) {
         while (_scanner_at_end(scanner) == 0) {
             scanner->start = scanner->current;
             _scanner_tokenize(scanner);
+        }
+
+        char end = scanner->src[scanner->current - 1];
+
+        if (end != ';' && end != '{' && end != '}') {
+            printf("mini: line %d, missing semicolon or curly brace\n", scanner->line);
+            scanner->successful = 0;
         }
 
         scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, 0, scanner->line);
