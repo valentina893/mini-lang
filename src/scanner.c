@@ -27,13 +27,16 @@ void _scanner_postfix(scanner *scanner) {
                     case RIGHT_PARENTHESES: _scanner_find_left_parentheses(&result, token_stack, &j); break; // pop until '(' is found
                     case EQUAL: // operators
                     case EQUAL_EQUAL:
+                    case IF:
                     case NOT_EQUAL:
                     case FUNCTION:
                     case MINUS:
                     case PLUS:
                     case SLASH:
                     case STAR: _scanner_handle_operator(result, token_stack, curr_token, &j); break; // pop lower/equal tokens from stack
-                    case SEMICOLON: while (token_stack_is_empty(token_stack) == 0) {result[j++] = token_stack_pop(token_stack);} break; // pop remaining operators
+                    case SEMICOLON: 
+                    case LEFT_CURLY: while (token_stack_is_empty(token_stack) == 0) {result[j++] = token_stack_pop(token_stack);} break; // pop remaining operators
+                    case RIGHT_CURLY: result[j++] = curr_token;
                     default: break;
                 }
             }
