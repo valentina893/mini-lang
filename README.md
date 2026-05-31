@@ -9,3 +9,6 @@ What currently works:
 To-do:
 - Add support for the following:
   - Else-if and else statements
+    - Add token types for `ELIF` and `ELSE`
+    - Correctly tokenize new token types
+- Handle variables defined within if branch
