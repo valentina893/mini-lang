@@ -28,6 +28,8 @@ void _scanner_postfix(scanner *scanner) {
                     case EQUAL: // operators
                     case EQUAL_EQUAL:
                     case IF:
+                    case ELIF:
+                    case ELSE:
                     case NOT_EQUAL:
                     case FUNCTION:
                     case MINUS:
@@ -200,6 +202,24 @@ void _scanner_identifier(scanner *scanner) {
                 _scanner_add_token(scanner, IF, value_start, length, scanner->depth++);
             } else {
                 printf("mini: line %d, incorrect if-statement syntax\n", scanner->line);
+            }
+        }
+        // check if identifier is keyword 'elif'
+        else if (strncmp(value_start, "elif", length) == 0) {
+            // should be 'if' following by whitespace
+            if (_scanner_peek(scanner) == ' ') {
+                _scanner_add_token(scanner, ELIF, value_start, length, scanner->depth++);
+            } else {
+                printf("mini: line %d, incorrect elif-statement syntax\n", scanner->line);
+            }
+        }
+        // check if identifier is keyword 'else'
+        else if (strncmp(value_start, "else", length) == 0) {
+            // should be 'if' following by whitespace
+            if (_scanner_peek(scanner) == ' ') {
+                _scanner_add_token(scanner, ELSE, value_start, length, scanner->depth++);
+            } else {
+                printf("mini: line %d, incorrect else syntax\n", scanner->line);
             }
         }
         else {
