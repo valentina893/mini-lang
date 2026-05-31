@@ -16,8 +16,8 @@ typedef enum token_type {
     LEFT_CURLY, LEFT_PARENTHESES,
     
 
-    // One or two character tokens
-    EQUAL, EQUAL_EQUAL, IF, NOT_EQUAL,
+    // Misc
+    EQUAL, EQUAL_EQUAL, IF, ELIF, ELSE, NOT_EQUAL,
 
     // Literals
     ID, STRING, INTEGER,

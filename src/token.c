@@ -75,7 +75,9 @@ int token_prec(token *token) {
     if (token != NULL) {
         switch (token->type) {
             case EQUAL: 
-            case IF: return 0;
+            case IF: 
+            case ELIF: 
+            case ELSE: return 0;
             case EQUAL_EQUAL:
             case MINUS:
             case NOT_EQUAL:
@@ -118,6 +120,8 @@ void token_print_type(token *token) {
             case EQUAL: printf("equal\n"); break;
             case EQUAL_EQUAL: printf("equal equal\n"); break;
             case IF: printf("if\n"); break;
+            case ELIF: printf("elif\n"); break;
+            case ELSE: printf("else\n"); break;
             case NOT_EQUAL: printf("not equal\n"); break;
             case ID: printf("id\n"); break;
             case STRING: printf("string\n"); break;
