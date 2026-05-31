@@ -143,7 +143,7 @@ value *value_unary_operation(value *val, token *op_token) {
     value *val_temp = val;
     if (val != NULL && op_token != NULL) {
         if (val->type == V_VARIABLE) val = val->variable->value;
-        if (op_token->type == IF) {
+        if (op_token->type == IF || op_token->type == ELIF) {
             if (val->type == V_INTEGER) {
                 res = value_init_int(val->integer);
             }
