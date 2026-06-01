@@ -34,18 +34,15 @@ Expected Output:
 2
 ```
 
-Handling nested if-elif-else statements:
-- Every time we see an `IF` token
-  - If we can enter the if branch
-    - Set `if_prec` to result of boolean
-    - Store the token's `literal` in `if_prec_depth`
-  - Else skip over it until we find a `}` with equal `literal`
-- Every time we see an `ELIF` token
-  - If `if_prec` != 1
-    - If we can enter the elif branch
-      - Set `if_prec` to result of boolean
-      - Store the token's `literal` in `if_prec_depth`
-  - Else skip over it until we find a `}` with equal `literal`
-- Every time we see an `ELSE` token
-  - If `if_prec` != 1
-    - Enter the elif branch
+# Handling nested if-elif-else statements using a stack-based approach:
+- `IF` tokens:
+  - If true, push `IF` to stack
+  - Else, set skip flag to `1`
+- `ELIF` / `ELSE` tokens:
+  - check if stack top has `IF` or `ELIF` token with == depth
+    - If yes, set skip flag to `1`
+    - Else
+      - If token is `ELIF` and true, push `ELIF` to stack
+      - Else set skip flag to `1`
+- If skip flag == `1`
+  - Skip through tokens until `}` with == depth is found
