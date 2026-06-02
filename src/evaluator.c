@@ -140,18 +140,7 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
         int skip = 0;
         value *res = NULL;
         value *a = NULL;
-        if (curr_token->type == IF) {
-            a = value_stack_pop(evaluator->stack);
-            if (a != NULL) {
-                res = value_unary_operation(a, curr_token);
-                // push conditional token to if_stack if we can enter it
-                if (res->integer == 1) {
-                    token_stack_push(evaluator->if_stack, curr_token);
-                } else {
-                    skip = 1;
-                }
-            }
-        } else if (curr_token->type == ELIF || curr_token->type == ELSE) {
+        if (curr_token->type == ELIF || curr_token->type == ELSE) {
             token *top = token_stack_top(evaluator->if_stack);
             if (top != NULL) {
                 // check if top has == depth to curr_token, we skip if it does
@@ -167,19 +156,15 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
                 }
                 if (curr_token->type == ELSE) top = token_stack_pop(evaluator->if_stack);
             }
-            // evaluate elif statement
-            if (curr_token->type == ELIF && skip == 0) {
-                a = value_stack_pop(evaluator->stack);
-                if (a != NULL) {
-                    // push to stack if we can enter
-                    res = value_unary_operation(a, curr_token);
-                    if (res->integer == 1) {
-                        token_stack_push(evaluator->if_stack, curr_token);
-                    }
-                    else {
-                        skip = 1;
-                    }
-                }
+        }
+        // evaluate conditional statement
+        if (curr_token->type != ELSE && skip == 0) {
+            a = value_stack_pop(evaluator->stack);
+            if (a != NULL) {
+                // push to stack if we can enter
+                res = value_unary_operation(a, curr_token);
+                if (res->integer == 1) { token_stack_push(evaluator->if_stack, curr_token);}
+                else {skip = 1;}
             }
         }
         // skip tokens until we see a '}' with == depth to curr_token
