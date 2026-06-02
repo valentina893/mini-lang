@@ -12,6 +12,7 @@ evaluator *evaluator_init(int tokens_amt, token **tokens) {
     evaluator->variable_amt = 0;
     evaluator->tokens = tokens;
     evaluator->stack = value_stack_init(tokens_amt);
+    evaluator->if_stack = token_stack_init(tokens_amt);
     evaluator->memory = (struct variable**)malloc(sizeof(struct variable*) * tokens_amt);
     for (int i = 0; i < tokens_amt; i++) evaluator->memory[i] = NULL;
     return evaluator;
@@ -79,6 +80,8 @@ int _evaluator_handle_operator(evaluator *evaluator, token *curr_token) {
     switch (curr_token->type) {
         // unary operations
         case IF:
+        case ELIF:
+        case ELSE:
             return _evaluator_handle_unary_operation(evaluator, curr_token);
             break;
         // binary operations
@@ -134,28 +137,65 @@ int _evaluator_handle_function(evaluator *evaluator, token *curr_token) {
 
 int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
     if (evaluator != NULL && curr_token != NULL) {
-        value *a = value_stack_pop(evaluator->stack);
-        if (a != NULL) {
-            value *res = value_unary_operation(a, curr_token);
-            // check if if-statement was successful
-            if (curr_token->type == IF && res != NULL) {
-                // jump past next '}' if if-statement was false.
-                if (res->integer == 0) {
-                    int if_depth = curr_token->literal;
-                    // search for right curly brace with equal depth to if token
-                    for (; evaluator->tokens_idx < evaluator->tokens_amt; evaluator->tokens_idx++) {
-                        curr_token = evaluator->tokens[evaluator->tokens_idx];
-                        if (curr_token->type == RIGHT_CURLY) {
-                            if (curr_token->literal == if_depth) {
-                                break;
-                            }
-                        }
+        int skip = 0;
+        value *res = NULL;
+        value *a = NULL;
+        if (curr_token->type == IF) {
+            a = value_stack_pop(evaluator->stack);
+            if (a != NULL) {
+                res = value_unary_operation(a, curr_token);
+                // push conditional token to if_stack if we can enter it
+                if (res->integer == 1) {
+                    token_stack_push(evaluator->if_stack, curr_token);
+                } else {
+                    skip = 1;
+                }
+            }
+        } else if (curr_token->type == ELIF || curr_token->type == ELSE) {
+            token *top = token_stack_top(evaluator->if_stack);
+            if (top != NULL) {
+                // check if top has == depth to curr_token, we skip if it does
+                if (curr_token->literal == top->literal) {
+                    skip = 1;
+                    if (curr_token->type == ELSE) top = token_stack_pop(evaluator->if_stack);
+                } else if (curr_token->literal < top->literal) {
+                    // pop from stack until we find a conditional token with == depth
+                    while (top != NULL && curr_token->literal < top->literal) {
+                        top = token_stack_pop(evaluator->if_stack);
+                    }
+                    if (top != NULL && curr_token->literal == top->literal) {
+                        if (curr_token->type == ELSE) token_stack_pop(evaluator->if_stack);
+                        skip = 1;
                     }
                 }
-                value_delete(a);
-                return 1;
+            }
+            // evaluate elif statement
+            if (curr_token->type == ELIF && skip == 0) {
+                a = value_stack_pop(evaluator->stack);
+                if (a != NULL) {
+                    // push to stack if we can enter
+                    res = value_unary_operation(a, curr_token);
+                    if (res->integer == 1) {
+                        token_stack_push(evaluator->if_stack, curr_token);
+                    }
+                    else {
+                        skip = 1;
+                    }
+                }
             }
         }
+        // skip tokens until we see a '}' with == depth to curr_token
+        if (skip == 1) {
+            int curr_depth = curr_token->literal;
+            for (; evaluator->tokens_idx < evaluator->tokens_amt; evaluator->tokens_idx++) {
+                if (evaluator->tokens[evaluator->tokens_idx]->type == RIGHT_CURLY) {
+                    if (evaluator->tokens[evaluator->tokens_idx]->literal == curr_depth) {
+                        break;
+                    }
+                }
+            }
+        }
+        return 1;
     }
     return 0;
 }

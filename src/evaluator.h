@@ -14,6 +14,7 @@ typedef struct evaluator {
     int tokens_amt;
     int variable_amt;
     value_stack *stack;
+    token_stack *if_stack;
     token **tokens;
     variable **memory;
 } evaluator;
