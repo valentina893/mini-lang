@@ -12,12 +12,12 @@ if guess == answer {
         if guess2 == answer2 {
             print("correct again!");
         }
-        if guess2 != answer2 {
+        else {
             print("incorrect this time!");
         }
     }
 }
-if guess != answer {
+else {
     print("incorrect!");
 }
 print("thanks for playing!");
