@@ -1,23 +1,25 @@
-answer = "3";
-print("guess the number i'm thinking of...");
-guess = input();
-if guess == answer {
-    print("correct!");
-    print("keep playing? y/n");
-    choice = input();
-    if choice == "y" {
-        print("guess again!");
-        answer2 = "50";
-        guess2 = input();
-        if guess2 == answer2 {
-            print("correct again!");
+if 1 {
+    print(1);
+    if 1 {
+        print(2);
+        if 1 {
+            print(3);
         }
-        else {
-            print("incorrect this time!");
-        }
+    } elif 1 {
+        print(4);
+    } else {
+        print(5);
     }
+} else {
+    print(6);
 }
-else {
-    print("incorrect!");
+if 0 {
+    print(7);
+} elif 1 {
+    print(8);
+    if 1 {
+        print(9);
+    }
+} else {
+    print(10);
 }
-print("thanks for playing!");
