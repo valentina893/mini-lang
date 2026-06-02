@@ -40,7 +40,7 @@ int token_stack_is_empty(token_stack *token_stack) {
 }
 
 token *token_stack_top(token_stack *token_stack) {
-    if (token_stack != NULL) {
+    if (token_stack != NULL && token_stack->top != -1) {
         return token_stack->data[token_stack->top];
     }
     return NULL;
