@@ -157,17 +157,15 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
                 // check if top has == depth to curr_token, we skip if it does
                 if (curr_token->literal == top->literal) {
                     skip = 1;
-                    if (curr_token->type == ELSE) top = token_stack_pop(evaluator->if_stack);
                 } else if (curr_token->literal < top->literal) {
-                    // pop from stack until we find a conditional token with == depth
-                    while (top != NULL && curr_token->literal < top->literal) {
-                        top = token_stack_pop(evaluator->if_stack);
-                    }
-                    if (top != NULL && curr_token->literal == top->literal) {
-                        if (curr_token->type == ELSE) token_stack_pop(evaluator->if_stack);
-                        skip = 1;
+                    // pop from stack until empty or we find a conditional token with == depth
+                    while (token_stack_is_empty(evaluator->if_stack) == 0) {
+                        token_stack_pop(evaluator->if_stack);
+                        top = token_stack_top(evaluator->if_stack);
+                        if (curr_token->literal == top->literal) {skip = 1; break;}
                     }
                 }
+                if (curr_token->type == ELSE) top = token_stack_pop(evaluator->if_stack);
             }
             // evaluate elif statement
             if (curr_token->type == ELIF && skip == 0) {
