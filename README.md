@@ -39,10 +39,12 @@ Expected Output:
   - If true, push `IF` to stack
   - Else, set skip flag to `1`
 - `ELIF` / `ELSE` tokens:
-  - check if stack top has `IF` or `ELIF` token with == depth
-    - If yes, set skip flag to `1`
-    - Else
-      - If token is `ELIF` and true, push `ELIF` to stack
-      - Else set skip flag to `1`
+  - If stack top has == depth
+    - Set skip flag to `1`
+  - Else if stack top has < depth
+    - Pop tokens out until == depth is found or stack is empty
+    - If final stack top has == depth, set skip flag to `1`
+  - If `ELIF` and skip flag == 0, evaluate
+    - If we can't enter, set skip flag to `1`
 - If skip flag == `1`
   - Skip through tokens until `}` with == depth is found
