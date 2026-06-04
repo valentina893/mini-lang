@@ -192,7 +192,13 @@ value *value_boolean(value *a, value *b, token *op_token) {
 void value_print(value *a) {
     if (a != NULL) {
         value *a_temp = a;
-        if (a->type == V_VARIABLE) a = a->variable->value;
+        if (a->type == V_VARIABLE && a->variable != NULL) {
+            if (a->variable->value != NULL) {
+                a = a->variable->value;
+            } else {
+                printf("mini: undefined variable\n");
+            }
+        }
         switch (a->type) {
             case V_INTEGER:
                 printf("%d\n", a->integer);
