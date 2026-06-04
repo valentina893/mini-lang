@@ -267,9 +267,7 @@ void _scanner_tokenize(scanner *scanner) {
 
             // ignore whitespaces and newlines
             case ' ': break;
-            case '\n':
-                scanner->line++;
-                break;
+            case '\n': scanner->line++; break;
             
             default:
                 if (_scanner_is_digit(c)) {
@@ -357,13 +355,6 @@ int scanner_get_tokens(scanner *scanner) {
         while (_scanner_at_end(scanner) == 0) {
             scanner->start = scanner->current;
             _scanner_tokenize(scanner);
-        }
-
-        char end = scanner->src[scanner->current - 1];
-
-        if (end != ';' && end != '{' && end != '}') {
-            printf("mini: line %d, missing semicolon or curly brace\n", scanner->line);
-            scanner->successful = 0;
         }
 
         scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, 0, scanner->line);
