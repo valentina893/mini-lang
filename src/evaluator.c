@@ -125,12 +125,15 @@ int _evaluator_handle_function(evaluator *evaluator, token *curr_token) {
     if (evaluator != NULL && curr_token != NULL) {
         if (strcmp(curr_token->lexeme, "print") == 0) {
             value *a = value_stack_pop(evaluator->stack);
-            value_print(a);
-            value_delete(a);
+            if (a != NULL) {
+                value_print(a);
+                value_delete(a);
+                return 1;
+            }
         } else if (strcmp(curr_token->lexeme, "input") == 0) {
             value_stack_push(evaluator->stack, value_input());
+            return 1;
         }
-        return 1;
     }
     return 0;
 }
