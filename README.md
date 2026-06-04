@@ -14,6 +14,8 @@ Interpreted programming language written in C.
 
 See [examples](examples/) for some example mini-lang source code!
 
+## Compiling and running
+
 Compile with make:
 ```
 make
