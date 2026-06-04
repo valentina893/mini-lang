@@ -1,50 +1,25 @@
 # mini-lang
 
-This branch is for adding conditional control flow to mini-lang.
+Interpreted programming language written in C.
 
-What currently works:
-- Single branch if-statements
-- Nested if-statements
+## Features
 
-To-do:
-- Add support for the following:
-  - Else-if and else statements
-- Handle variables defined within if branch
+- Integer, string, and boolean data types
+- Dynamic typing
+- Variable assignment
+- Arithmetic and comparison expressions
+- User input and output using `input()` and `print()`
+- Conditional branching (`if`, `elif`, `else`)
+- Nested conditional statements
 
-Example Code:
+See [examples](examples/) for some example mini-lang source code!
+
+Compile with make:
 ```
-if 1 {
-  print(1);
-  if 1 {
-    print(2);
-  } elif 1 {
-    print(3);
-  } else {
-    print(4);
-  }
-}
-else {
-  print(5);
-}
+make
 ```
 
-Expected Output:
+Run as such:
 ```
-1
-2
+./mini file.mini
 ```
-
-# Handling nested if-elif-else statements using a stack-based approach:
-- `IF` tokens:
-  - If true, push `IF` to stack
-  - Else, set skip flag to `1`
-- `ELIF` / `ELSE` tokens:
-  - If stack top has == depth
-    - Set skip flag to `1`
-  - Else if stack top has < depth
-    - Pop tokens out until == depth is found or stack is empty
-    - If final stack top has == depth, set skip flag to `1`
-  - If `ELIF` and skip flag == 0, evaluate
-    - If we can't enter, set skip flag to `1`
-- If skip flag == `1`
-  - Skip through tokens until `}` with == depth is found
