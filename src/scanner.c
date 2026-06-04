@@ -268,6 +268,11 @@ void _scanner_tokenize(scanner *scanner) {
             // ignore whitespaces and newlines
             case ' ': break;
             case '\n': scanner->line++; break;
+            case '#':
+                 while (_scanner_peek(scanner) != '\n' && _scanner_at_end(scanner) != 1) {
+                    _scanner_advance(scanner);
+                 }
+                 break;
             
             default:
                 if (_scanner_is_digit(c)) {
