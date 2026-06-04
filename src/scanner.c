@@ -268,10 +268,6 @@ void _scanner_tokenize(scanner *scanner) {
             // ignore whitespaces and newlines
             case ' ': break;
             case '\n':
-                if (_scanner_prev(scanner) != ';' && _scanner_prev(scanner) != '{' && _scanner_prev(scanner) != '}') {
-                    printf("mini: line %d, missing semicolon or curly brace\n", scanner->line);
-                    scanner->successful = 0;
-                }
                 scanner->line++;
                 break;
             
