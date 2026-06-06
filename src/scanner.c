@@ -27,13 +27,22 @@ void _scanner_postfix(scanner *scanner) {
                     case RIGHT_PARENTHESES: _scanner_find_left_parentheses(&result, token_stack, &j); break; // pop until '(' is found
                     case EQUAL: // operators
                     case EQUAL_EQUAL:
+                    case GREATER:
+                    case GREATER_EQUAL:
+                    case IF:
+                    case ELIF:
+                    case ELSE:
                     case NOT_EQUAL:
                     case FUNCTION:
+                    case LESS:
+                    case LESS_EQUAL:
                     case MINUS:
                     case PLUS:
                     case SLASH:
                     case STAR: _scanner_handle_operator(result, token_stack, curr_token, &j); break; // pop lower/equal tokens from stack
-                    case SEMICOLON: while (token_stack_is_empty(token_stack) == 0) {result[j++] = token_stack_pop(token_stack);} break; // pop remaining operators
+                    case SEMICOLON: 
+                    case LEFT_CURLY: while (token_stack_is_empty(token_stack) == 0) {result[j++] = token_stack_pop(token_stack);} break; // pop remaining operators
+                    case RIGHT_CURLY: result[j++] = curr_token; break;
                     default: break;
                 }
             }
@@ -189,7 +198,35 @@ void _scanner_identifier(scanner *scanner) {
         // check if identifier is function call
         if (_scanner_peek(scanner) == '(') {
             _scanner_add_token(scanner, FUNCTION, value_start, length, 0);
-        } else {
+        }
+        // check if identifier is keyword 'if'
+        else if (strncmp(value_start, "if", length) == 0) {
+            // should be 'if' following by whitespace
+            if (_scanner_peek(scanner) == ' ') {
+                _scanner_add_token(scanner, IF, value_start, length, scanner->depth++);
+            } else {
+                printf("mini: line %d, incorrect if-statement syntax\n", scanner->line);
+            }
+        }
+        // check if identifier is keyword 'elif'
+        else if (strncmp(value_start, "elif", length) == 0) {
+            // should be 'if' following by whitespace
+            if (_scanner_peek(scanner) == ' ') {
+                _scanner_add_token(scanner, ELIF, value_start, length, scanner->depth++);
+            } else {
+                printf("mini: line %d, incorrect elif-statement syntax\n", scanner->line);
+            }
+        }
+        // check if identifier is keyword 'else'
+        else if (strncmp(value_start, "else", length) == 0) {
+            // should be 'if' following by whitespace
+            if (_scanner_peek(scanner) == ' ') {
+                _scanner_add_token(scanner, ELSE, value_start, length, scanner->depth++);
+            } else {
+                printf("mini: line %d, incorrect else syntax\n", scanner->line);
+            }
+        }
+        else {
             _scanner_add_token(scanner, ID, value_start, length, 0);
         }
     }
@@ -206,7 +243,9 @@ void _scanner_tokenize(scanner *scanner) {
             case '+': _scanner_add_token(scanner, PLUS, scanner->src + scanner->start, 1, 0); break;
             case '/': _scanner_add_token(scanner, SLASH, scanner->src + scanner->start, 1, 0); break;
             case '*': _scanner_add_token(scanner, STAR, scanner->src + scanner->start, 1, 0); break;
+            case '}': _scanner_add_token(scanner, RIGHT_CURLY, scanner->src + scanner->start, 1, --scanner->depth); break;
             case ')': _scanner_add_token(scanner, RIGHT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
+            case '{': _scanner_add_token(scanner, LEFT_CURLY, scanner->src + scanner->start, 1, 0); break;
             case '(': _scanner_add_token(scanner, LEFT_PARENTHESES, scanner->src + scanner->start, 1, 0); break;
             case ';': _scanner_add_token(scanner, SEMICOLON, scanner->src + scanner->start, 1, 0); break;
 
@@ -222,6 +261,14 @@ void _scanner_tokenize(scanner *scanner) {
                  }
                  else _scanner_add_token(scanner, NOT_EQUAL, scanner->src + scanner->start, 2, 0);
                  break;
+            case '<':
+                if (_scanner_match(scanner, '=') == 0) _scanner_add_token(scanner, LESS, scanner->src + scanner->start, 1, 0);
+                else _scanner_add_token(scanner, LESS_EQUAL, scanner->src + scanner->start, 2, 0);
+                break;
+            case '>':
+                if (_scanner_match(scanner, '=') == 0) _scanner_add_token(scanner, GREATER, scanner->src + scanner->start, 1, 0);
+                else _scanner_add_token(scanner, GREATER_EQUAL, scanner->src + scanner->start, 2, 0);
+                break;
 
             // literals
             case '"': _scanner_string(scanner); break;
@@ -232,13 +279,12 @@ void _scanner_tokenize(scanner *scanner) {
 
             // ignore whitespaces and newlines
             case ' ': break;
-            case '\n':
-                if (_scanner_prev(scanner) != ';') {
-                    printf("mini: line %d, missing semicolon\n", scanner->line);
-                    scanner->successful = 0;
-                }
-                scanner->line++;
-                break;
+            case '\n': scanner->line++; break;
+            case '#':
+                 while (_scanner_peek(scanner) != '\n' && _scanner_at_end(scanner) != 1) {
+                    _scanner_advance(scanner);
+                 }
+                 break;
             
             default:
                 if (_scanner_is_digit(c)) {
@@ -291,6 +337,7 @@ scanner *scanner_init(args *args, int tokens_max) {
                     scanner->start = 0;
                     scanner->current = 0;
                     scanner->line = 1;
+                    scanner->depth = 0;
                     scanner->successful = 1;
 
                     // init cmd line args

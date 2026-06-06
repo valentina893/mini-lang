@@ -2,28 +2,19 @@
 
 Interpreted programming language written in C.
 
-Features:
-- 3 data types:
-  - Integers
-  - Strings
-  - Booleans (implemented internally as integers)
+## Features
+
+- Integer, string, and boolean data types
 - Dynamic typing
-- Variable assignment using the `=` operator
-- Arithmetic expressions for integers
-  - `+` addition 
-  - `-` subtraction
-  - `*` multiplication
-  - `/` division
-- String concatenation using the `+` operator
-- Boolean expressions 
-  - `==` equality
-  - `!=` inequality
-- Console output 
-  - Print variables and literal values using `print()`
-- Standard Input
-  - Read user input from the console using `input()`
+- Variable assignment
+- Arithmetic and comparison expressions
+- User input and output using `input()` and `print()`
+- Conditional branching (`if`, `elif`, `else`)
+- Nested conditional statements
 
 See [examples](examples/) for some example mini-lang source code!
+
+## Compiling and running
 
 Compile with make:
 ```
@@ -34,4 +25,3 @@ Run as such:
 ```
 ./mini file.mini
 ```
-

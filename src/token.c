@@ -40,7 +40,7 @@ int token_stack_is_empty(token_stack *token_stack) {
 }
 
 token *token_stack_top(token_stack *token_stack) {
-    if (token_stack != NULL) {
+    if (token_stack != NULL && token_stack->top != -1) {
         return token_stack->data[token_stack->top];
     }
     return NULL;
@@ -74,15 +74,23 @@ int token_prec(token *token) {
 
     if (token != NULL) {
         switch (token->type) {
-            case EQUAL: return 0;
+            case EQUAL: 
+            case IF: 
+            case ELIF: 
+            case ELSE: return 0;
             case EQUAL_EQUAL:
+            case GREATER:
+            case GREATER_EQUAL:
+            case LESS:
+            case LESS_EQUAL:
             case MINUS:
             case NOT_EQUAL:
             case PLUS:
             case STAR:
             case SLASH: return 1;
             case FUNCTION: return 2;
-            case LEFT_PARENTHESES: return 3;
+            case LEFT_PARENTHESES: 
+            case LEFT_CURLY: return 3;
             default:
                 break;
         }
@@ -109,11 +117,20 @@ void token_print_type(token *token) {
             case SLASH: printf("slash\n"); break;
             case STAR: printf("star\n"); break;
             case SEMICOLON: printf("semicolon\n"); break;
+            case RIGHT_CURLY: printf("right curly\n"); break;
             case RIGHT_PARENTHESES: printf("right parentheses\n"); break;
+            case LEFT_CURLY: printf("left curly\n"); break;
             case LEFT_PARENTHESES: printf("left parentheses\n"); break;
             case EQUAL: printf("equal\n"); break;
             case EQUAL_EQUAL: printf("equal equal\n"); break;
+            case IF: printf("if\n"); break;
+            case ELIF: printf("elif\n"); break;
+            case ELSE: printf("else\n"); break;
             case NOT_EQUAL: printf("not equal\n"); break;
+            case GREATER: printf("greater\n"); break;
+            case GREATER_EQUAL: printf("greater equal\n"); break;
+            case LESS: printf("less\n"); break;
+            case LESS_EQUAL: printf("less equal\n"); break;
             case ID: printf("id\n"); break;
             case STRING: printf("string\n"); break;
             case INTEGER: printf("integer\n"); break;

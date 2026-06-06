@@ -12,10 +12,12 @@ All token types that can exist in mini-lang.
 */
 typedef enum token_type {
     // Single character tokens
-    MINUS, PLUS, SLASH, STAR, SEMICOLON, RIGHT_PARENTHESES, LEFT_PARENTHESES,
-
-    // One or two character tokens
-    EQUAL, EQUAL_EQUAL, NOT_EQUAL,
+    MINUS, PLUS, SLASH, STAR, SEMICOLON,RIGHT_CURLY, RIGHT_PARENTHESES,
+    LEFT_CURLY, LEFT_PARENTHESES,
+    
+    // Misc
+    EQUAL, EQUAL_EQUAL, IF, ELIF, ELSE, NOT_EQUAL, 
+    GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
 
     // Literals
     ID, STRING, INTEGER,

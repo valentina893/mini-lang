@@ -10,8 +10,11 @@
 Evaluator class that reads tokens and uses stack-based approach to evaluate code.
 */
 typedef struct evaluator {
-    int tokens_amt, variable_amt;
+    int tokens_idx;
+    int tokens_amt;
+    int variable_amt;
     value_stack *stack;
+    token_stack *if_stack;
     token **tokens;
     variable **memory;
 } evaluator;
@@ -55,5 +58,10 @@ int _evaluator_handle_binary_operation(evaluator *evaluator, token *curr_token);
 Evaluates function calls.
 */
 int _evaluator_handle_function(evaluator *evaluator, token *curr_token);
+
+/*
+Evaluates unary operation such as if (boolean) {}
+*/
+int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token);
 
 #endif

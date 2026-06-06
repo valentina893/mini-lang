@@ -97,6 +97,11 @@ Implementation of print().
 void value_print(value *a);
 
 /*
+Handles unary operation for a value such as if-statements.
+*/
+value *value_unary_operation(value *val, token *op_token);
+
+/*
 Initializes empty value stack.
 */
 value_stack *value_stack_init(int size);
