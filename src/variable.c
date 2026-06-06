@@ -124,7 +124,9 @@ value *value_binary_operation(value *a, value *b, token *op_token) {
         } else {
             if (a->type == V_VARIABLE) a = a->variable->value;
             // arithmetic expressions
-            if (op_token->type != EQUAL_EQUAL && op_token->type != NOT_EQUAL) {
+            if (op_token->type != EQUAL_EQUAL && op_token->type != NOT_EQUAL
+                && op_token->type != GREATER && op_token->type != GREATER_EQUAL
+                && op_token->type != LESS && op_token->type != LESS_EQUAL) {
                 res = value_arithmetic(a, b, op_token);
             }
             // boolean expressions 
@@ -160,28 +162,45 @@ value *value_boolean(value *a, value *b, token *op_token) {
         if (a->type != b->type) {
             if (op_token->type == EQUAL_EQUAL) res = value_init_int(0);
             else if (op_token->type == NOT_EQUAL) res = value_init_int(1);
+            else printf("mini: unsupported operands for %s\n", op_token->lexeme);
         }
         // same data type 
         else {
             // comparing ints
             if (a->type == V_INTEGER) {
-                if (a->integer != b->integer) {
-                    if (op_token->type == EQUAL_EQUAL) res = value_init_int(0);
-                    else if (op_token->type == NOT_EQUAL) res = value_init_int(1);
-                } else {
-                    if (op_token->type == EQUAL_EQUAL) res = value_init_int(1);
-                    else if (op_token->type == NOT_EQUAL) res = value_init_int(0);
-                }
+                if (op_token->type == EQUAL_EQUAL) {
+                    if (a->integer != b->integer) res = value_init_int(0);
+                    else res = value_init_int(1);
+                } else if (op_token->type == NOT_EQUAL) {
+                    if (a->integer != b->integer) res = value_init_int(1);
+                    else res = value_init_int(0);
+                } else if (op_token->type == GREATER) {
+                    if (a->integer > b->integer) res = value_init_int(1);
+                    else res = value_init_int(0);
+                } else if (op_token->type == GREATER_EQUAL) {
+                    if (a->integer >= b->integer) res = value_init_int(1);
+                    else res = value_init_int(0);
+                } else if (op_token->type == LESS) {
+                    if (a->integer < b->integer) res = value_init_int(1);
+                    else res = value_init_int(0);
+                } else if (op_token->type == LESS_EQUAL) {
+                    if (a->integer <= b->integer) res = value_init_int(1);
+                    else res = value_init_int(0);
+                } else res = value_init_int(0);
             }
             // comparing strings
             else if (a->type == V_STRING) {
-                // not equal
-                if (strcmp(a->string, b->string) != 0) {
-                    if (op_token->type == EQUAL_EQUAL) res = value_init_int(0);
-                    else if (op_token->type == NOT_EQUAL) res = value_init_int(1);
+                if (op_token->type == EQUAL_EQUAL || op_token->type == NOT_EQUAL) {
+                    // not equal
+                    if (strcmp(a->string, b->string) != 0) {
+                        if (op_token->type == EQUAL_EQUAL) res = value_init_int(0);
+                        else if (op_token->type == NOT_EQUAL) res = value_init_int(1);
+                    } else {
+                        if (op_token->type == EQUAL_EQUAL) res = value_init_int(1);
+                        else if (op_token->type == NOT_EQUAL) res = value_init_int(0);
+                    }
                 } else {
-                    if (op_token->type == EQUAL_EQUAL) res = value_init_int(1);
-                    else if (op_token->type == NOT_EQUAL) res = value_init_int(0);
+                    printf("mini: unsupported operands for %s\n", op_token->lexeme);
                 }
             }
         }
