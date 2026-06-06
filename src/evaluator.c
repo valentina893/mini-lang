@@ -85,8 +85,9 @@ int _evaluator_handle_operator(evaluator *evaluator, token *curr_token) {
             return _evaluator_handle_unary_operation(evaluator, curr_token);
             break;
         // binary operations
-        case EQUAL:
-        case EQUAL_EQUAL:
+        case EQUAL: case EQUAL_EQUAL:
+        case GREATER: case GREATER_EQUAL:
+        case LESS: case LESS_EQUAL:
         case MINUS:
         case NOT_EQUAL:
         case PLUS:
