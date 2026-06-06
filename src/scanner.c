@@ -27,11 +27,15 @@ void _scanner_postfix(scanner *scanner) {
                     case RIGHT_PARENTHESES: _scanner_find_left_parentheses(&result, token_stack, &j); break; // pop until '(' is found
                     case EQUAL: // operators
                     case EQUAL_EQUAL:
+                    case GREATER:
+                    case GREATER_EQUAL:
                     case IF:
                     case ELIF:
                     case ELSE:
                     case NOT_EQUAL:
                     case FUNCTION:
+                    case LESS:
+                    case LESS_EQUAL:
                     case MINUS:
                     case PLUS:
                     case SLASH:
@@ -257,6 +261,14 @@ void _scanner_tokenize(scanner *scanner) {
                  }
                  else _scanner_add_token(scanner, NOT_EQUAL, scanner->src + scanner->start, 2, 0);
                  break;
+            case '<':
+                if (_scanner_match(scanner, '=') == 0) _scanner_add_token(scanner, LESS, scanner->src + scanner->start, 1, 0);
+                else _scanner_add_token(scanner, LESS_EQUAL, scanner->src + scanner->start, 2, 0);
+                break;
+            case '>':
+                if (_scanner_match(scanner, '=') == 0) _scanner_add_token(scanner, GREATER, scanner->src + scanner->start, 1, 0);
+                else _scanner_add_token(scanner, GREATER_EQUAL, scanner->src + scanner->start, 2, 0);
+                break;
 
             // literals
             case '"': _scanner_string(scanner); break;
