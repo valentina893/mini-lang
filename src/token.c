@@ -79,6 +79,10 @@ int token_prec(token *token) {
             case ELIF: 
             case ELSE: return 0;
             case EQUAL_EQUAL:
+            case GREATER:
+            case GREATER_EQUAL:
+            case LESS:
+            case LESS_EQUAL:
             case MINUS:
             case NOT_EQUAL:
             case PLUS:
@@ -123,6 +127,10 @@ void token_print_type(token *token) {
             case ELIF: printf("elif\n"); break;
             case ELSE: printf("else\n"); break;
             case NOT_EQUAL: printf("not equal\n"); break;
+            case GREATER: printf("greater\n"); break;
+            case GREATER_EQUAL: printf("greater equal\n"); break;
+            case LESS: printf("less\n"); break;
+            case LESS_EQUAL: printf("less equal\n"); break;
             case ID: printf("id\n"); break;
             case STRING: printf("string\n"); break;
             case INTEGER: printf("integer\n"); break;
