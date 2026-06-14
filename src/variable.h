@@ -5,8 +5,6 @@
 
 #include "token.h"
 
-//typedef struct variable* variable_ptr;
-
 /*
 Data type of the value. Could also be an error or variable* placeholder.
 */
