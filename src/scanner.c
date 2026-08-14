@@ -189,6 +189,7 @@ int _scanner_is_alpha_numeric(char c) {
     return _scanner_is_alpha(c) || _scanner_is_digit(c);
 }
 
+// TODO: split this method into smaller ones to keep < 50 lines
 void _scanner_identifier(scanner *scanner) {
 
     if (scanner != NULL) {
@@ -210,7 +211,7 @@ void _scanner_identifier(scanner *scanner) {
         }
         // check if identifier is keyword 'elif'
         else if (strncmp(value_start, "elif", length) == 0) {
-            // should be 'if' following by whitespace
+            // should be 'elif' following by whitespace
             if (_scanner_peek(scanner) == ' ') {
                 _scanner_add_token(scanner, ELIF, value_start, length, scanner->depth++);
             } else {
@@ -219,11 +220,29 @@ void _scanner_identifier(scanner *scanner) {
         }
         // check if identifier is keyword 'else'
         else if (strncmp(value_start, "else", length) == 0) {
-            // should be 'if' following by whitespace
+            // should be 'else' following by whitespace
             if (_scanner_peek(scanner) == ' ') {
                 _scanner_add_token(scanner, ELSE, value_start, length, scanner->depth++);
             } else {
                 printf("mini: line %d, incorrect else syntax\n", scanner->line);
+            }
+        }
+        // check if identifier is keyword 'while'
+        else if (strncmp(value_start, "while", length) == 0) {
+            // should be 'while' following by whitespace
+            if (_scanner_peek(scanner) == ' ') {
+                _scanner_add_token(scanner, WHILE, value_start, length, scanner->depth++);
+            } else {
+                printf("mini: line %d, incorrect while syntax\n", scanner->line);
+            }
+        }
+        // check if identifier is keyword 'break'
+        else if (strncmp(value_start, "break", length) == 0) {
+            // should be 'break' following by whitespace
+            if (_scanner_peek(scanner) == ';') {
+                _scanner_add_token(scanner, BREAK, value_start, length, scanner->depth++);
+            } else {
+                printf("mini: line %d, incorrect break syntax\n", scanner->line);
             }
         }
         else {
