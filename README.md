@@ -42,3 +42,8 @@ Evaluation Algorithm:
       - Evaluate condition array
       - If condition array's result is true
         - Step back to index of token that begins code within while loop
+
+To-do:
+- Tokenize while and break tokens - DONE
+- Implement infix -> postfix tokenization for while and break tokens.
+- Write helper methods to shorten _scanner_identifier() to be <50 lines
