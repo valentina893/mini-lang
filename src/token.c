@@ -131,6 +131,8 @@ void token_print_type(token *token) {
             case GREATER_EQUAL: printf("greater equal\n"); break;
             case LESS: printf("less\n"); break;
             case LESS_EQUAL: printf("less equal\n"); break;
+            case WHILE: printf("while\n"); break;
+            case BREAK: printf("break\n"); break;
             case ID: printf("id\n"); break;
             case STRING: printf("string\n"); break;
             case INTEGER: printf("integer\n"); break;

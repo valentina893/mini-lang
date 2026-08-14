@@ -17,7 +17,7 @@ typedef enum token_type {
     
     // Misc
     EQUAL, EQUAL_EQUAL, IF, ELIF, ELSE, NOT_EQUAL, 
-    GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
+    GREATER, GREATER_EQUAL, LESS, LESS_EQUAL, WHILE, BREAK,
 
     // Literals
     ID, STRING, INTEGER,
