@@ -74,9 +74,10 @@ int token_prec(token *token) {
 
     if (token != NULL) {
         switch (token->type) {
-            case EQUAL: 
+            case EQUAL:
+            case WHILE: 
             case IF: 
-            case ELIF: 
+            case ELIF:
             case ELSE: return 0;
             case EQUAL_EQUAL:
             case GREATER:
@@ -90,6 +91,7 @@ int token_prec(token *token) {
             case SLASH: return 1;
             case FUNCTION: return 2;
             case LEFT_PARENTHESES: 
+            case BREAK:
             case LEFT_CURLY: return 3;
             default:
                 break;
