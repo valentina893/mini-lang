@@ -36,6 +36,8 @@ Evaluation Algorithm:
     - Save original postfix sequence of tokens in condition_array.
     - Save index of token that begins code within while loop
     - Evaluate tokens after while token.
+    - If break token is read:
+      - Skip past right curly brace with equal depth to while token
     - If right curly brace with equal depth to while token is found:
       - Evaluate condition array
       - If condition array's result is true
