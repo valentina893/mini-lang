@@ -1,0 +1,7 @@
+print("guess the word i'm thinking of...");
+guess = input();
+while guess != "cool" {
+    print("try again!");
+    guess = input();
+}
+print("good job!");
