@@ -53,4 +53,6 @@ To-do:
   - Pass in scanner class to _scanner_handle_operator()
   - Create flag for whether or not we are between a while token and left_curly
 - Write helper methods to shorten _scanner_identifier() to be <50 lines
-- Create evaluator logic for handling while and break tokens.
+- Make Evaluator solve while loops in tokens array.
+  - Add support for while op_tokens in value_unary_operation()
+  - Create logic for Evaluator to create a saved while condition before entering while loop
