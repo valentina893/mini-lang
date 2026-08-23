@@ -17,6 +17,12 @@ typedef struct evaluator {
     token_stack *if_stack;
     token **tokens;
     variable **memory;
+
+    token **while_condition;
+    int while_cond_size;
+    int while_start;
+    int while_depth;
+    int while_flag;
 } evaluator;
 
 /*
@@ -58,6 +64,16 @@ int _evaluator_handle_binary_operation(evaluator *evaluator, token *curr_token);
 Evaluates function calls.
 */
 int _evaluator_handle_function(evaluator *evaluator, token *curr_token);
+
+/*
+Saves tokens representing conditional expression for while loop for re-evaluation.
+*/
+void _evaluator_save_while_condition(evaluator *evaluator);
+
+/*
+Re-evaluates while condition and returns it's boolean (integer) result of 1 or 0.
+*/
+int _evaluator_solve_while_condition(evaluator *evaluator);
 
 /*
 Evaluates unary operation such as if (boolean) {}
