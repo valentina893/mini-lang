@@ -301,10 +301,6 @@ void _scanner_tokenize(scanner *scanner) {
                 if (_scanner_match(scanner, '=') == 0) _scanner_add_token(scanner, GREATER, scanner->src + scanner->start, 1, 0);
                 else _scanner_add_token(scanner, GREATER_EQUAL, scanner->src + scanner->start, 2, 0);
                 break;
-            //case 'i':
-                //if (_scanner_match(scanner, 'f') == 1) _scanner_add_token(scanner, IF, scanner->src + scanner->start, 2, 0);
-                //else _scanner_identifier(scanner);
-                //break;
 
             // literals
             case '"': _scanner_string(scanner); break;
