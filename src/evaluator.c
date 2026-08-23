@@ -14,6 +14,11 @@ evaluator *evaluator_init(int tokens_amt, token **tokens) {
     evaluator->stack = value_stack_init(tokens_amt);
     evaluator->if_stack = token_stack_init(tokens_amt);
     evaluator->memory = (struct variable**)malloc(sizeof(struct variable*) * tokens_amt);
+    evaluator->while_condition = NULL;
+    evaluator->while_cond_size = 0;
+    evaluator->while_start = 0;
+    evaluator->while_depth = 0;
+    evaluator->while_flag = 0;
     for (int i = 0; i < tokens_amt; i++) evaluator->memory[i] = NULL;
     return evaluator;
 }
@@ -26,9 +31,22 @@ void evaluator_run(evaluator *evaluator) {
             case ID:
             case INTEGER:
             case STRING:
+            case BREAK:
                 if (_evaluator_handle_operand(evaluator, curr_token) == 0) exit = 1;
                 break;
-            case RIGHT_CURLY: continue;
+            case RIGHT_CURLY:
+                if (evaluator->while_flag == 1 && curr_token->literal == evaluator->while_depth) {
+                    // evaluate condition
+                    if (_evaluator_solve_while_condition(evaluator) == 1) {
+                        // reset tokens_idx to beginning of while loop
+                        evaluator->tokens_idx = evaluator->while_start;
+                    } else {
+                        evaluator->while_flag = 0;
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
             default:
                 if (_evaluator_handle_operator(evaluator, curr_token) == 0) exit = 1;
                 break;
@@ -68,6 +86,16 @@ int _evaluator_handle_operand(evaluator *evaluator, token *curr_token) {
             case STRING:
                 value_stack_push(evaluator->stack, value_init_string(curr_token->size, curr_token->lexeme));
                 break;
+            case BREAK:
+                for (; evaluator->tokens_idx < evaluator->tokens_amt; evaluator->tokens_idx++) {
+                    if (evaluator->tokens[evaluator->tokens_idx]->type == RIGHT_CURLY) {
+                        if (evaluator->tokens[evaluator->tokens_idx]->literal == curr_token->literal) {
+                            evaluator->while_flag = 0;
+                            break;
+                        }
+                    }
+                }
+                evaluator->tokens_idx -= 3;
             default:
                 break;
         }
@@ -82,6 +110,7 @@ int _evaluator_handle_operator(evaluator *evaluator, token *curr_token) {
         case IF:
         case ELIF:
         case ELSE:
+        case WHILE:
             return _evaluator_handle_unary_operation(evaluator, curr_token);
             break;
         // binary operations
@@ -100,7 +129,7 @@ int _evaluator_handle_operator(evaluator *evaluator, token *curr_token) {
             return _evaluator_handle_function(evaluator, curr_token);
             break;
         default:
-            break;
+            return 1;
     }
     return 0;
 }
@@ -139,6 +168,67 @@ int _evaluator_handle_function(evaluator *evaluator, token *curr_token) {
     return 0;
 }
 
+void _evaluator_save_while_condition(evaluator *evaluator) {
+    if (evaluator != NULL) {
+        int i = evaluator->tokens_idx;
+        token *temp_token = evaluator->tokens[--i];
+        while (temp_token->type != LEFT_CURLY) {
+            temp_token = evaluator->tokens[--i];
+        }
+        i++;
+        int size = evaluator->tokens_idx - i;
+        evaluator->while_condition = (struct token**)malloc(sizeof(struct token*) * size);
+        for (; i < evaluator->tokens_idx; i++) {
+            evaluator->while_condition[evaluator->while_cond_size++] = evaluator->tokens[i];
+        }
+    }
+    return;
+}
+
+int _evaluator_solve_while_condition(evaluator *evaluator) {
+    
+    value_stack *cond_value_stack = NULL;
+    variable *var = NULL;
+    value *b = NULL;
+    value *a = NULL;
+
+    if (evaluator != NULL) {
+        cond_value_stack = value_stack_init(evaluator->while_cond_size);
+        for (int i = 0; i < evaluator->while_cond_size; i++) {
+            token *curr_token = evaluator->while_condition[i];
+            switch (curr_token->type) {
+                case ID:
+                    var = _evaluator_variable_seen(evaluator, curr_token->lexeme);
+                    value_stack_push(cond_value_stack, value_init_variable(var));
+                    break;
+                case INTEGER:
+                    value_stack_push(cond_value_stack, value_init_int(curr_token->literal));
+                    break;
+                case STRING:
+                    value_stack_push(cond_value_stack, value_init_string(curr_token->size, curr_token->lexeme));
+                    break;
+                default:
+                    b = value_stack_pop(cond_value_stack);
+                    a = value_stack_pop(cond_value_stack);
+                    if (b != NULL) {
+                        if (a != NULL) {
+                            value_stack_push(cond_value_stack, value_binary_operation(a, b, curr_token));
+                            value_delete(b);
+                            value_delete(a);                    
+                            break;
+                        }
+                    }
+            }
+        }
+        value *res = value_stack_pop(cond_value_stack);
+        //value_stack_delete(cond_value_stack);
+        if (res != NULL) {
+            return res->integer;
+        }
+    }
+    return 0;
+}
+
 int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
     if (evaluator != NULL && curr_token != NULL) {
         int skip = 0;
@@ -161,14 +251,28 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
                 if (curr_token->type == ELSE) top = token_stack_pop(evaluator->if_stack);
             }
         }
-        // evaluate conditional statement
+        // evaluate conditional statement (if, elif, or while)
         if (curr_token->type != ELSE && skip == 0) {
             a = value_stack_pop(evaluator->stack);
             if (a != NULL) {
                 // push to stack if we can enter
                 res = value_unary_operation(a, curr_token);
-                if (res->integer == 1) { token_stack_push(evaluator->if_stack, curr_token);}
-                else {skip = 1;}
+                if (res->integer == 1) {
+                    // check which op_token we passed in
+                    if (curr_token->type == IF || curr_token->type == ELIF) {
+                        token_stack_push(evaluator->if_stack, curr_token);
+                    } else if (curr_token->type == WHILE) {
+                        // save the condition for re-evaluation, set flag, set start
+                        _evaluator_save_while_condition(evaluator);
+                        evaluator->while_flag = 1;
+                        evaluator->while_start = evaluator->tokens_idx;
+                        evaluator->while_depth = curr_token->literal;
+                    }  
+                }
+                else {
+                    token_print(curr_token);
+                    skip = 1;
+                }
             }
         }
         // skip tokens until we see a '}' with == depth to curr_token
@@ -181,6 +285,7 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
                     }
                 }
             }
+            evaluator->tokens_idx -= 3;
         }
         return 1;
     }
