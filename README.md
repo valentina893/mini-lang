@@ -19,9 +19,13 @@ Infix tokenization of code (lines 3-6):
 ```
 
 Infix -> Postfix process:
-- When while token is read, place left_curly in postfix array
+- When while token is read
+  - Place left_curly in postfix array
+  - Set scanner flag knowing we are expecting a left_curly for the while token.
 - Convert condition regularly
-- When left_curly token is read, place while in postfix array
+- When left_curly token is read
+  - Check our scanner flag if this is part of while loop
+  - Place while in postfix array
 - Tokenize the rest of the code as usual.
 
 Postfix tokenization of code (lines 3-6):
@@ -45,5 +49,8 @@ Evaluation Algorithm:
 
 To-do:
 - Tokenize while and break tokens - DONE
-- Implement infix -> postfix tokenization for while and break tokens.
+- Implement infix -> postfix tokenization for while and break tokens. - DONE
+  - Pass in scanner class to _scanner_handle_operator()
+  - Create flag for whether or not we are between a while token and left_curly
 - Write helper methods to shorten _scanner_identifier() to be <50 lines
+- Create evaluator logic for handling while and break tokens.
