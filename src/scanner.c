@@ -20,8 +20,9 @@ void _scanner_postfix(scanner *scanner) {
         for (int i = 0; i < scanner->tokens_amt; i++) {
             if (scanner->tokens[i] != NULL) { token *curr_token = scanner->tokens[i];
                 switch (curr_token->type) {
-                    case ID: // operands get pushed to result
+                    case ID: // operands and breaks get pushed to result
                     case INTEGER:
+                    case BREAK:
                     case STRING: result[j] = curr_token; j++; break;
                     case LEFT_PARENTHESES: token_stack_push(token_stack, curr_token); break; // push '(' to stack immediately
                     case RIGHT_PARENTHESES: _scanner_find_left_parentheses(&result, token_stack, &j); break; // pop until '(' is found
@@ -36,12 +37,19 @@ void _scanner_postfix(scanner *scanner) {
                     case FUNCTION:
                     case LESS:
                     case LESS_EQUAL:
+                    case WHILE:
                     case MINUS:
                     case PLUS:
                     case SLASH:
-                    case STAR: _scanner_handle_operator(result, token_stack, curr_token, &j); break; // pop lower/equal tokens from stack
+                    case STAR: _scanner_handle_operator(scanner, result, token_stack, curr_token, &j); break; // pop lower/equal tokens from stack
                     case SEMICOLON: 
-                    case LEFT_CURLY: while (token_stack_is_empty(token_stack) == 0) {result[j++] = token_stack_pop(token_stack);} break; // pop remaining operators
+                    case LEFT_CURLY:
+                        if (scanner->reading_while == 1) {
+                            //result[j++] = token_init(WHILE, "while", 5, 0, scanner->line);
+                            scanner->reading_while = 0;
+                        } //else {
+                            while (token_stack_is_empty(token_stack) == 0) {result[j++] = token_stack_pop(token_stack);} break; // pop remaining operators
+                        //}
                     case RIGHT_CURLY: result[j++] = curr_token; break;
                     default: break;
                 }
@@ -62,10 +70,15 @@ void _scanner_find_left_parentheses(token ***result, token_stack *token_stack, i
     token_stack_pop(token_stack);
 }
 
-void _scanner_handle_operator(token **result, token_stack *token_stack, token* curr_token, int *j) {
+void _scanner_handle_operator(scanner *scanner, token **result, token_stack *token_stack, token* curr_token, int *j) {
+    if (curr_token->type == WHILE) {
+        result[*j] = token_init(LEFT_CURLY, "{", 1, 0, 0); (*j)++;
+        scanner->reading_while = 1;
+
+    }
     while (token_stack_is_empty(token_stack) == 0 && token_stack_top(token_stack)->type != LEFT_PARENTHESES
             && token_prec(token_stack_top(token_stack)) >= token_prec(curr_token)) {
-        result[(*j)++] = token_stack_pop(token_stack);
+        result[*j] = token_stack_pop(token_stack); (*j)++;
     }
     token_stack_push(token_stack, curr_token);
 }
@@ -201,7 +214,7 @@ void _scanner_identifier(scanner *scanner) {
             _scanner_add_token(scanner, FUNCTION, value_start, length, 0);
         }
         // check if identifier is keyword 'if'
-        else if (strncmp(value_start, "if", length) == 0) {
+        else if (strncmp(value_start, "if", 2) == 0) {
             // should be 'if' following by whitespace
             if (_scanner_peek(scanner) == ' ') {
                 _scanner_add_token(scanner, IF, value_start, length, scanner->depth++);
@@ -210,7 +223,7 @@ void _scanner_identifier(scanner *scanner) {
             }
         }
         // check if identifier is keyword 'elif'
-        else if (strncmp(value_start, "elif", length) == 0) {
+        else if (strncmp(value_start, "elif", 4) == 0) {
             // should be 'elif' following by whitespace
             if (_scanner_peek(scanner) == ' ') {
                 _scanner_add_token(scanner, ELIF, value_start, length, scanner->depth++);
@@ -219,7 +232,7 @@ void _scanner_identifier(scanner *scanner) {
             }
         }
         // check if identifier is keyword 'else'
-        else if (strncmp(value_start, "else", length) == 0) {
+        else if (strncmp(value_start, "else", 4) == 0) {
             // should be 'else' following by whitespace
             if (_scanner_peek(scanner) == ' ') {
                 _scanner_add_token(scanner, ELSE, value_start, length, scanner->depth++);
@@ -228,7 +241,7 @@ void _scanner_identifier(scanner *scanner) {
             }
         }
         // check if identifier is keyword 'while'
-        else if (strncmp(value_start, "while", length) == 0) {
+        else if (strncmp(value_start, "while", 5) == 0) {
             // should be 'while' following by whitespace
             if (_scanner_peek(scanner) == ' ') {
                 _scanner_add_token(scanner, WHILE, value_start, length, scanner->depth++);
@@ -237,8 +250,8 @@ void _scanner_identifier(scanner *scanner) {
             }
         }
         // check if identifier is keyword 'break'
-        else if (strncmp(value_start, "break", length) == 0) {
-            // should be 'break' following by whitespace
+        else if (strncmp(value_start, "break", 5) == 0) {
+            // should be 'break' following by semicolon
             if (_scanner_peek(scanner) == ';') {
                 _scanner_add_token(scanner, BREAK, value_start, length, scanner->depth++);
             } else {
@@ -288,6 +301,10 @@ void _scanner_tokenize(scanner *scanner) {
                 if (_scanner_match(scanner, '=') == 0) _scanner_add_token(scanner, GREATER, scanner->src + scanner->start, 1, 0);
                 else _scanner_add_token(scanner, GREATER_EQUAL, scanner->src + scanner->start, 2, 0);
                 break;
+            //case 'i':
+                //if (_scanner_match(scanner, 'f') == 1) _scanner_add_token(scanner, IF, scanner->src + scanner->start, 2, 0);
+                //else _scanner_identifier(scanner);
+                //break;
 
             // literals
             case '"': _scanner_string(scanner); break;
@@ -358,6 +375,8 @@ scanner *scanner_init(args *args, int tokens_max) {
                     scanner->line = 1;
                     scanner->depth = 0;
                     scanner->successful = 1;
+
+                    scanner->reading_while = 0;
 
                     // init cmd line args
                     scanner->tokens_infix = args->tokens_infix;
