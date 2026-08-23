@@ -2,6 +2,11 @@
 
 This branch is for implementing conditional loops in mini-lang.
 
+Currently, this branch supports single-nested while loops.
+You can view some examples in [`fibonacci.mini`](examples/fibonacci.mini) and [`while.mini`](examples/while.mini).
+
+We are still implementing better functionality for break statements, if-statements within loops, and nested loops.
+
 Example Code:
 ```
 1 print("guess the word i'm thinking of...");
