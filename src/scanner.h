@@ -36,6 +36,9 @@ typedef struct scanner {
     int tokens_infix;
     int tokens_postfix;
 
+    // reading while loop flag
+    int reading_while;
+
     // success flag
     int successful;
 
@@ -59,7 +62,7 @@ void _scanner_find_left_parentheses(token ***result, token_stack *token_stack, i
 /*
 Pops operators from token stack until current token has lower precedence than top. Current token is then pushed to stack.
 */
-void _scanner_handle_operator(token **result, token_stack *token_stack, token* curr_token, int *j);
+void _scanner_handle_operator(scanner *scanner, token **result, token_stack *token_stack, token* curr_token, int *j);
 
 /*
 Resizes tokens array to be double its current maximum capacity.
