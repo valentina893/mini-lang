@@ -41,15 +41,12 @@ void _scanner_postfix(scanner *scanner) {
                     case MINUS:
                     case PLUS:
                     case SLASH:
-                    case STAR: _scanner_handle_operator(scanner, result, token_stack, curr_token, &j); break; // pop lower/equal tokens from stack
-                    case SEMICOLON: 
+                    case STAR: _scanner_handle_operator(scanner, result, token_stack, curr_token, &j); break; // pop lower/equal tokens from stack 
                     case LEFT_CURLY:
-                        if (scanner->reading_while == 1) {
-                            //result[j++] = token_init(WHILE, "while", 5, 0, scanner->line);
-                            scanner->reading_while = 0;
-                        } //else {
-                            while (token_stack_is_empty(token_stack) == 0) {result[j++] = token_stack_pop(token_stack);} break; // pop remaining operators
-                        //}
+                        if (scanner->reading_while == 1) scanner->reading_while = 0;
+                    case SEMICOLON:
+                        while (token_stack_is_empty(token_stack) == 0) result[j++] = token_stack_pop(token_stack); 
+                        break; // pop remaining operators
                     case RIGHT_CURLY: result[j++] = curr_token; break;
                     default: break;
                 }
@@ -64,10 +61,14 @@ void _scanner_postfix(scanner *scanner) {
 }
 
 void _scanner_find_left_parentheses(token ***result, token_stack *token_stack, int *j) {
-    while (token_stack_is_empty(token_stack) == 0 && token_stack_top(token_stack)->type != LEFT_PARENTHESES) {
+    while (token_stack_is_empty(token_stack) == 0 && 
+            token_stack_top(token_stack)->type != LEFT_PARENTHESES &&
+            token_stack_top(token_stack)->type != FUNCTION) {
         (*result)[(*j)++] = token_stack_pop(token_stack);
-    } 
-    token_stack_pop(token_stack);
+    }
+    if (token_stack_top(token_stack)->type != FUNCTION) {
+        token_stack_pop(token_stack);
+    }
 }
 
 void _scanner_handle_operator(scanner *scanner, token **result, token_stack *token_stack, token* curr_token, int *j) {
@@ -251,8 +252,8 @@ void _scanner_identifier(scanner *scanner) {
         }
         // check if identifier is keyword 'break'
         else if (strncmp(value_start, "break", 5) == 0) {
-            // should be 'break' following by semicolon
-            if (_scanner_peek(scanner) == ';') {
+            // should be 'break' following by whitespace or semicolon
+            if (_scanner_peek(scanner) == ' ' || _scanner_peek(scanner) == ';') {
                 _scanner_add_token(scanner, BREAK, value_start, length, scanner->depth);
             } else {
                 printf("mini: line %d, incorrect break syntax\n", scanner->line);
