@@ -32,21 +32,20 @@ void evaluator_run(evaluator *evaluator) {
             case INTEGER:
             case STRING:
             case BREAK:
-                if (_evaluator_handle_operand(evaluator, curr_token) == 0) exit = 1;
+                if (_evaluator_handle_operand(evaluator, curr_token) == 0) {exit = 1;}
                 break;
             case RIGHT_CURLY:
-                if (evaluator->while_flag == 1 && curr_token->literal == evaluator->while_depth) {
+                if (evaluator->while_flag == 1) {
                     // evaluate condition
                     if (_evaluator_solve_while_condition(evaluator) == 1) {
                         // reset tokens_idx to beginning of while loop
                         evaluator->tokens_idx = evaluator->while_start;
                     } else {
                         evaluator->while_flag = 0;
-                        continue;
                     }
-                } else {
-                    continue;
                 }
+                break;
+            case LEFT_CURLY: break;
             default:
                 if (_evaluator_handle_operator(evaluator, curr_token) == 0) exit = 1;
                 break;
@@ -87,15 +86,9 @@ int _evaluator_handle_operand(evaluator *evaluator, token *curr_token) {
                 value_stack_push(evaluator->stack, value_init_string(curr_token->size, curr_token->lexeme));
                 break;
             case BREAK:
-                for (; evaluator->tokens_idx < evaluator->tokens_amt; evaluator->tokens_idx++) {
-                    if (evaluator->tokens[evaluator->tokens_idx]->type == RIGHT_CURLY) {
-                        if (evaluator->tokens[evaluator->tokens_idx]->literal == curr_token->literal) {
-                            evaluator->while_flag = 0;
-                            break;
-                        }
-                    }
-                }
-                evaluator->tokens_idx -= 3;
+                evaluator->while_flag = 0;
+                _evaluator_skip_tokens(evaluator, token_init(RIGHT_CURLY, "{", 1, curr_token->literal, 0));
+                break;
             default:
                 break;
         }
@@ -168,6 +161,19 @@ int _evaluator_handle_function(evaluator *evaluator, token *curr_token) {
     return 0;
 }
 
+void _evaluator_skip_tokens(evaluator *evaluator, token *target) {
+    if (evaluator != NULL && target != NULL) {
+        for (int i = evaluator->tokens_idx; i < evaluator->tokens_amt; i++) {
+            if (evaluator->tokens[i]->type == target->type) {
+                if (evaluator->tokens[i]->literal == target->literal) {
+                    evaluator->tokens_idx = i;
+                    break;
+                }
+            }
+        }
+    }
+}
+
 void _evaluator_save_while_condition(evaluator *evaluator) {
     if (evaluator != NULL) {
         int i = evaluator->tokens_idx;
@@ -221,7 +227,7 @@ int _evaluator_solve_while_condition(evaluator *evaluator) {
             }
         }
         value *res = value_stack_pop(cond_value_stack);
-        //value_stack_delete(cond_value_stack);
+        value_stack_delete(cond_value_stack);
         if (res != NULL) {
             return res->integer;
         }
@@ -270,22 +276,13 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
                     }  
                 }
                 else {
-                    token_print(curr_token);
                     skip = 1;
                 }
             }
         }
-        // skip tokens until we see a '}' with == depth to curr_token
+        // skip past tokens in conditional branch or while loop
         if (skip == 1) {
-            int curr_depth = curr_token->literal;
-            for (; evaluator->tokens_idx < evaluator->tokens_amt; evaluator->tokens_idx++) {
-                if (evaluator->tokens[evaluator->tokens_idx]->type == RIGHT_CURLY) {
-                    if (evaluator->tokens[evaluator->tokens_idx]->literal == curr_depth) {
-                        break;
-                    }
-                }
-            }
-            evaluator->tokens_idx -= 3;
+            _evaluator_skip_tokens(evaluator, token_init(RIGHT_CURLY, "{", 1, curr_token->literal, 0));
         }
         return 1;
     }
