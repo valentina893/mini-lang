@@ -264,10 +264,11 @@ void value_stack_push(value_stack *value_stack, value *value) {
 
 void value_stack_delete(value_stack *value_stack) {
     if (value_stack != NULL) {
-        for (int i = 0; i < value_stack->capacity; i++) {
-            value_delete(value_stack->data[i]);
+        while (value_stack_is_empty(value_stack) == 0) {
+            value_delete(value_stack_pop(value_stack));
         }
         free(value_stack);
+        value_stack = NULL;
     }
 }
 
