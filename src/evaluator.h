@@ -66,6 +66,11 @@ Evaluates function calls.
 int _evaluator_handle_function(evaluator *evaluator, token *curr_token);
 
 /*
+Skips tokens until a target token with equal type and literal is found.
+*/
+void _evaluator_skip_tokens(evaluator *evaluator, token *target);
+
+/*
 Saves tokens representing conditional expression for while loop for re-evaluation.
 */
 void _evaluator_save_while_condition(evaluator *evaluator);
