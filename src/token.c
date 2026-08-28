@@ -90,8 +90,7 @@ int token_prec(token *token) {
             case STAR:
             case SLASH: return 1;
             case FUNCTION: return 2;
-            case LEFT_PARENTHESES: 
-            case BREAK:
+            case LEFT_PARENTHESES:
             case LEFT_CURLY: return 3;
             default:
                 break;
