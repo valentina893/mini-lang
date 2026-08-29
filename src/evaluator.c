@@ -253,9 +253,7 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
             token *top = token_stack_top(evaluator->if_stack);
             while (token_stack_is_empty(evaluator->if_stack) == 0 &&
                     top->type == IF && top->literal >= curr_token->literal) {
-                        token *pop = token_stack_pop(evaluator->if_stack);
-                        printf("popping:\n");
-                        token_print(pop);
+                        token_stack_pop(evaluator->if_stack);
             }
         }
 
