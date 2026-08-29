@@ -254,7 +254,7 @@ void _scanner_identifier(scanner *scanner) {
         else if (strncmp(value_start, "break", 5) == 0) {
             // should be 'break' following by whitespace or semicolon
             if (_scanner_peek(scanner) == ' ' || _scanner_peek(scanner) == ';') {
-                _scanner_add_token(scanner, BREAK, value_start, length, scanner->depth);
+                _scanner_add_token(scanner, BREAK, value_start, length, 0);
             } else {
                 printf("mini: line %d, incorrect break syntax\n", scanner->line);
             }
