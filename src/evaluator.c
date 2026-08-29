@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "random.h"
+
 #include "evaluator.h"
 
 evaluator *evaluator_init(int tokens_amt, token **tokens) {
@@ -35,12 +37,13 @@ void evaluator_run(evaluator *evaluator) {
                 if (_evaluator_handle_operand(evaluator, curr_token) == 0) {exit = 1;}
                 break;
             case RIGHT_CURLY:
-                if (evaluator->while_flag == 1) {
+                if (evaluator->while_flag == 1 && curr_token->literal == evaluator->while_depth) {
                     // evaluate condition
                     if (_evaluator_solve_while_condition(evaluator) == 1) {
                         // reset tokens_idx to beginning of while loop
                         evaluator->tokens_idx = evaluator->while_start;
                     } else {
+                        // clear current while attributes
                         evaluator->while_flag = 0;
                     }
                 }
@@ -156,6 +159,13 @@ int _evaluator_handle_function(evaluator *evaluator, token *curr_token) {
         } else if (strcmp(curr_token->lexeme, "input") == 0) {
             value_stack_push(evaluator->stack, value_input());
             return 1;
+        } else if (strcmp(curr_token->lexeme, "random") == 0) {
+            value *a = value_stack_pop(evaluator->stack);
+            if (a != NULL) {
+                value_stack_push(evaluator->stack, value_init_int(rand_int(0, a->integer)));
+                value_delete(a);
+                return 1;
+            }
         }
     }
     return 0;
@@ -237,6 +247,18 @@ int _evaluator_solve_while_condition(evaluator *evaluator) {
 
 int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
     if (evaluator != NULL && curr_token != NULL) {
+
+        // for each curr IF token, we pop prev IF tokens from if-stack with >= depth
+        if (curr_token->type == IF && token_stack_is_empty(evaluator->if_stack) == 0) {
+            token *top = token_stack_top(evaluator->if_stack);
+            while (token_stack_is_empty(evaluator->if_stack) == 0 &&
+                    top->type == IF && top->literal >= curr_token->literal) {
+                        token *pop = token_stack_pop(evaluator->if_stack);
+                        printf("popping:\n");
+                        token_print(pop);
+            }
+        }
+
         int skip = 0;
         value *res = NULL;
         value *a = NULL;
