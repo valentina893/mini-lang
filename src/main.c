@@ -1,10 +1,13 @@
 #include "args.h"
 #include "evaluator.h"
+#include "random.h"
 #include "scanner.h"
 
 #define token_amt 100
 
 int main(int argc, char **argv) {
+
+    rand_seed();
 
     args *args = args_init(argc, argv);
     if (args != NULL) {
