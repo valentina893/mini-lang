@@ -252,8 +252,11 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
         if (curr_token->type == IF && token_stack_is_empty(evaluator->if_stack) == 0) {
             token *top = token_stack_top(evaluator->if_stack);
             while (token_stack_is_empty(evaluator->if_stack) == 0 &&
-                    top->type == IF && top->literal >= curr_token->literal) {
-                        token_stack_pop(evaluator->if_stack);
+                    (top->type == IF) && 
+                    top->literal >= curr_token->literal) {
+                        token *pop = token_stack_pop(evaluator->if_stack);
+                        //printf("popping from if_stack:\n");
+                        //token_print(pop);
             }
         }
 
@@ -269,12 +272,19 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
                 } else if (curr_token->literal < top->literal) {
                     // pop from stack until empty or we find a conditional token with == depth
                     while (token_stack_is_empty(evaluator->if_stack) == 0) {
-                        token_stack_pop(evaluator->if_stack);
+                        token *pop = token_stack_pop(evaluator->if_stack);
+                        //printf("popping from if_stack:\n");
+                        //token_print(pop);
                         top = token_stack_top(evaluator->if_stack);
                         if (curr_token->literal == top->literal) {skip = 1; break;}
                     }
                 }
-                if (curr_token->type == ELSE) top = token_stack_pop(evaluator->if_stack);
+                // climb +1 in depth
+                if (curr_token->type == ELSE && curr_token->literal == top->literal) {
+                    top = token_stack_pop(evaluator->if_stack); 
+                    //printf("popping from if_stack:\n"); 
+                    //token_print(top);
+                }
             }
         }
         // evaluate conditional statement (if, elif, or while)
@@ -286,6 +296,8 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
                 if (res->integer == 1) {
                     // check which op_token we passed in
                     if (curr_token->type == IF || curr_token->type == ELIF) {
+                        //printf("pushing to if_stack:\n");
+                        //token_print(curr_token);
                         token_stack_push(evaluator->if_stack, curr_token);
                     } else if (curr_token->type == WHILE) {
                         // save the condition for re-evaluation, set flag, set start
