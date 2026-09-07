@@ -241,51 +241,6 @@ value *value_input() {
     return value_init_string(strlen(buf), buf);
 }
 
-value_stack *value_stack_init(int size) {
-    value_stack *value_stack = (struct value_stack*)malloc(sizeof(struct value_stack));
-    value_stack->top = -1;
-    value_stack->capacity = size;
-    value_stack->data = (struct value**)malloc(sizeof(struct value*) * size);
-    return value_stack;
-}
-
-value *value_stack_pop(value_stack *value_stack) {
-    if (value_stack != NULL && value_stack->top != -1) {
-        return value_stack->data[value_stack->top--];
-    }
-    return NULL;
-}
-
-void value_stack_push(value_stack *value_stack, value *value) {
-    if (value_stack != NULL && value != NULL) {
-        value_stack->data[++value_stack->top] = value;
-    }
-}
-
-void value_stack_delete(value_stack *value_stack) {
-    if (value_stack != NULL) {
-        while (value_stack_is_empty(value_stack) == 0) {
-            value_delete(value_stack_pop(value_stack));
-        }
-        free(value_stack);
-        value_stack = NULL;
-    }
-}
-
-int value_stack_is_empty(value_stack *value_stack) {
-    if (value_stack != NULL) {
-        if (value_stack->top > -1) return 0;
-    }
-    return 1;
-}
-
-value *value_stack_top(value_stack *value_stack) {
-    if (value_stack != NULL && value_stack->top > -1) {
-        return value_stack->data[value_stack->top];
-    }
-    return NULL;
-}
-
 variable *variable_init(int id_size, char *id, value *value) {
 
     variable *variable = (struct variable*)malloc(sizeof(struct variable));
