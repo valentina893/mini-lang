@@ -48,44 +48,6 @@ typedef struct token {
 } token;
 
 /*
-Data structure for converting infix array to postfix and evaluating the postfix array.
-*/
-typedef struct token_stack {
-    int top, capacity;
-    token **data;
-} token_stack;
-
-/*
-Initializes empty token stack.
-*/
-token_stack *token_stack_init(int size);
-
-/*
-Removes and returns top token in token stack.
-*/
-token *token_stack_pop(token_stack *token_stack);
-
-/*
-Pushes new top token to token stack.
-*/
-void token_stack_push(token_stack *token_stack, token *token);
-
-/*
-Frees dynamically allocated token_stack.
-*/
-void token_stack_delete(token_stack *token_stack);
-
-/*
-Returns 1 if empty, else 0.
-*/
-int token_stack_is_empty(token_stack *token_stack);
-
-/*
-Returns token at the top of the stack.
-*/
-token *token_stack_top(token_stack *token_stack);
-
-/*
 Initializes token fields.
 */
 token *token_init(token_type type, char *data, int size, int literal, int line);

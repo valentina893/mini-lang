@@ -13,8 +13,8 @@ evaluator *evaluator_init(int tokens_amt, token **tokens) {
     evaluator->tokens_amt = tokens_amt - 1;
     evaluator->variable_amt = 0;
     evaluator->tokens = tokens;
-    evaluator->stack = value_stack_init(tokens_amt);
-    evaluator->if_stack = token_stack_init(tokens_amt);
+    stack_init(evaluator->stack);
+    stack_init(evaluator->if_stack);
     evaluator->memory = (struct variable**)malloc(sizeof(struct variable*) * tokens_amt);
     evaluator->while_condition = NULL;
     evaluator->while_cond_size = 0;
@@ -80,13 +80,13 @@ int _evaluator_handle_operand(evaluator *evaluator, token *curr_token) {
                     var = variable_init(curr_token->size, curr_token->lexeme, NULL);
                     evaluator->memory[evaluator->variable_amt++] = var;
                 }
-                value_stack_push(evaluator->stack, value_init_variable(var));
+                stack_push(evaluator->stack, value_init_variable(var));
                 break;
             case INTEGER:
-                value_stack_push(evaluator->stack, value_init_int(curr_token->literal));
+                stack_push(evaluator->stack, value_init_int(curr_token->literal));
                 break;
             case STRING:
-                value_stack_push(evaluator->stack, value_init_string(curr_token->size, curr_token->lexeme));
+                stack_push(evaluator->stack, value_init_string(curr_token->size, curr_token->lexeme));
                 break;
             case BREAK:
                 evaluator->while_flag = 0;
@@ -133,11 +133,11 @@ int _evaluator_handle_operator(evaluator *evaluator, token *curr_token) {
 int _evaluator_handle_binary_operation(evaluator *evaluator, token *curr_token) {
     if (evaluator != NULL) {
         // pop two values from stack
-        value *b = value_stack_pop(evaluator->stack);
-        value *a = value_stack_pop(evaluator->stack);
+        value *b = stack_pop(evaluator->stack);
+        value *a = stack_pop(evaluator->stack);
         if (b != NULL) {
             if (a != NULL) {
-                value_stack_push(evaluator->stack, value_binary_operation(a, b, curr_token));
+                stack_push(evaluator->stack, value_binary_operation(a, b, curr_token));
                 value_delete(b);
                 value_delete(a);
                 return 1;
@@ -150,19 +150,19 @@ int _evaluator_handle_binary_operation(evaluator *evaluator, token *curr_token) 
 int _evaluator_handle_function(evaluator *evaluator, token *curr_token) {
     if (evaluator != NULL && curr_token != NULL) {
         if (strcmp(curr_token->lexeme, "print") == 0) {
-            value *a = value_stack_pop(evaluator->stack);
+            value *a = stack_pop(evaluator->stack);
             if (a != NULL) {
                 value_print(a);
                 value_delete(a);
                 return 1;
             }
         } else if (strcmp(curr_token->lexeme, "input") == 0) {
-            value_stack_push(evaluator->stack, value_input());
+            stack_push(evaluator->stack, value_input());
             return 1;
         } else if (strcmp(curr_token->lexeme, "random") == 0) {
-            value *a = value_stack_pop(evaluator->stack);
+            value *a = stack_pop(evaluator->stack);
             if (a != NULL) {
-                value_stack_push(evaluator->stack, value_init_int(rand_int(0, a->integer)));
+                stack_push(evaluator->stack, value_init_int(rand_int(0, a->integer)));
                 value_delete(a);
                 return 1;
             }
@@ -203,32 +203,32 @@ void _evaluator_save_while_condition(evaluator *evaluator) {
 
 int _evaluator_solve_while_condition(evaluator *evaluator) {
     
-    value_stack *cond_value_stack = NULL;
+    pvalue_stack cond_value_stack;
     variable *var = NULL;
     value *b = NULL;
     value *a = NULL;
 
     if (evaluator != NULL) {
-        cond_value_stack = value_stack_init(evaluator->while_cond_size);
+        stack_init(cond_value_stack);
         for (int i = 0; i < evaluator->while_cond_size; i++) {
             token *curr_token = evaluator->while_condition[i];
             switch (curr_token->type) {
                 case ID:
                     var = _evaluator_variable_seen(evaluator, curr_token->lexeme);
-                    value_stack_push(cond_value_stack, value_init_variable(var));
+                    stack_push(cond_value_stack, value_init_variable(var));
                     break;
                 case INTEGER:
-                    value_stack_push(cond_value_stack, value_init_int(curr_token->literal));
+                    stack_push(cond_value_stack, value_init_int(curr_token->literal));
                     break;
                 case STRING:
-                    value_stack_push(cond_value_stack, value_init_string(curr_token->size, curr_token->lexeme));
+                    stack_push(cond_value_stack, value_init_string(curr_token->size, curr_token->lexeme));
                     break;
                 default:
-                    b = value_stack_pop(cond_value_stack);
-                    a = value_stack_pop(cond_value_stack);
+                    b = stack_pop(cond_value_stack);
+                    a = stack_pop(cond_value_stack);
                     if (b != NULL) {
                         if (a != NULL) {
-                            value_stack_push(cond_value_stack, value_binary_operation(a, b, curr_token));
+                            stack_push(cond_value_stack, value_binary_operation(a, b, curr_token));
                             value_delete(b);
                             value_delete(a);                    
                             break;
@@ -236,8 +236,8 @@ int _evaluator_solve_while_condition(evaluator *evaluator) {
                     }
             }
         }
-        value *res = value_stack_pop(cond_value_stack);
-        value_stack_delete(cond_value_stack);
+        value *res = stack_pop(cond_value_stack);
+        stack_delete(cond_value_stack);
         if (res != NULL) {
             return res->integer;
         }
@@ -249,12 +249,12 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
     if (evaluator != NULL && curr_token != NULL) {
 
         // for each curr IF token, we pop prev IF tokens from if-stack with >= depth
-        if (curr_token->type == IF && token_stack_is_empty(evaluator->if_stack) == 0) {
-            token *top = token_stack_top(evaluator->if_stack);
-            while (token_stack_is_empty(evaluator->if_stack) == 0 &&
+        if (curr_token->type == IF && stack_size(evaluator->if_stack) > 0) {
+            token *top = stack_peek(evaluator->if_stack);
+            while (stack_size(evaluator->if_stack) > 0 &&
                     (top->type == IF) && 
                     top->literal >= curr_token->literal) {
-                        token *pop = token_stack_pop(evaluator->if_stack);
+                        token *pop = stack_pop(evaluator->if_stack);
                         //printf("popping from if_stack:\n");
                         //token_print(pop);
             }
@@ -264,24 +264,24 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
         value *res = NULL;
         value *a = NULL;
         if (curr_token->type == ELIF || curr_token->type == ELSE) {
-            token *top = token_stack_top(evaluator->if_stack);
+            token *top = stack_peek(evaluator->if_stack);
             if (top != NULL) {
                 // check if top has == depth to curr_token, we skip if it does
                 if (curr_token->literal == top->literal) {
                     skip = 1;
                 } else if (curr_token->literal < top->literal) {
                     // pop from stack until empty or we find a conditional token with == depth
-                    while (token_stack_is_empty(evaluator->if_stack) == 0) {
-                        token *pop = token_stack_pop(evaluator->if_stack);
+                    while (stack_size(evaluator->if_stack) > 0) {
+                        token *pop = stack_pop(evaluator->if_stack);
                         //printf("popping from if_stack:\n");
                         //token_print(pop);
-                        top = token_stack_top(evaluator->if_stack);
+                        top = stack_pop(evaluator->if_stack);
                         if (curr_token->literal == top->literal) {skip = 1; break;}
                     }
                 }
                 // climb +1 in depth
                 if (curr_token->type == ELSE && curr_token->literal == top->literal) {
-                    top = token_stack_pop(evaluator->if_stack); 
+                    top = stack_pop(evaluator->if_stack); 
                     //printf("popping from if_stack:\n"); 
                     //token_print(top);
                 }
@@ -289,7 +289,7 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
         }
         // evaluate conditional statement (if, elif, or while)
         if (curr_token->type != ELSE && skip == 0) {
-            a = value_stack_pop(evaluator->stack);
+            a = stack_pop(evaluator->stack);
             if (a != NULL) {
                 // push to stack if we can enter
                 res = value_unary_operation(a, curr_token);
@@ -298,7 +298,7 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
                     if (curr_token->type == IF || curr_token->type == ELIF) {
                         //printf("pushing to if_stack:\n");
                         //token_print(curr_token);
-                        token_stack_push(evaluator->if_stack, curr_token);
+                        stack_push(evaluator->if_stack, curr_token);
                     } else if (curr_token->type == WHILE) {
                         // save the condition for re-evaluation, set flag, set start
                         _evaluator_save_while_condition(evaluator);

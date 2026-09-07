@@ -3,8 +3,15 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 
+#include "stack.h"
 #include "token.h"
 #include "variable.h"
+
+typedef struct token* ptoken;
+typedef struct value* pvalue;
+
+stack_t(ptoken);
+stack_t(pvalue);
 
 /*
 Evaluator class that reads tokens and uses stack-based approach to evaluate code.
@@ -13,8 +20,8 @@ typedef struct evaluator {
     int tokens_idx;
     int tokens_amt;
     int variable_amt;
-    value_stack *stack;
-    token_stack *if_stack;
+    pvalue_stack stack;
+    ptoken_stack if_stack;
     token **tokens;
     variable **memory;
 

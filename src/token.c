@@ -2,50 +2,6 @@
 
 #include "token.h"
 
-token_stack *token_stack_init(int size) {
-    token_stack *token_stack = (struct token_stack*)malloc(sizeof(struct token_stack));
-    token_stack->top = -1;
-    token_stack->capacity = size;
-    token_stack->data = (struct token**)malloc(sizeof(struct token*) * size);
-    return token_stack;
-}
-
-token *token_stack_pop(token_stack *token_stack) {
-    if (token_stack != NULL && token_stack->top != -1) {
-        return token_stack->data[token_stack->top--];
-    }
-    return NULL;
-}
-
-void token_stack_push(token_stack *token_stack, token *token) {
-    if (token_stack != NULL && token != NULL) {
-        token_stack->data[++token_stack->top] = token;
-    }
-}
-
-void token_stack_delete(token_stack *token_stack) {
-    if (token_stack != NULL) {
-        for (int i = 0; i < token_stack->capacity; i++) {
-            token_delete(token_stack->data[i]);
-        }
-        free(token_stack);
-    }
-}
-
-int token_stack_is_empty(token_stack *token_stack) {
-    if (token_stack != NULL) {
-        if (token_stack->top > -1) return 0;
-    }
-    return 1;
-}
-
-token *token_stack_top(token_stack *token_stack) {
-    if (token_stack != NULL && token_stack->top != -1) {
-        return token_stack->data[token_stack->top];
-    }
-    return NULL;
-}
-
 token *token_init(token_type type, char *data, int size, int literal, int line) {
 
     token *token = NULL;
