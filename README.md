@@ -1,74 +1,63 @@
 # mini-lang
 
-This branch is for integrating a custom macro-based stack class within mini-lang.
+This branch is for implementing conditional loops in mini-lang.
 
-We aim to replace the following classes with one singular stack class for code re-useability:
-- token_stack
-- value_stack
+Currently, this branch supports single-nested while loops with break statements.
+You can view some examples in [`fibonacci.mini`](examples/fibonacci.mini) and [`while.mini`](examples/while.mini).
 
-## How to integrate `stack.h`:
+We are still implementing nested loops.
 
-Currently, we use a hard coded `token_stack` and `value_stack` for tokens and values respectively. There are three main patterns to replace:
-1. Instantiations
-2. Stack Methods
-3. Passing Stacks to Functions
-
-### 1. Instantiations
-
-An example of an instantiation is in `src`/`scanner.c` within `_scanner_postfix()`, where we instantiate a `token_stack` as such:
-
+Example Code:
 ```
-token_stack *token_stack = token_stack_init(scanner->tokens_amt);
+1 print("guess the word i'm thinking of...");
+2 guess = input();
+3 while guess != "cool" {
+4     print("try again!");
+5     guess = input();
+6 }
+7 print("good job!");
 ```
 
-Or, similarly in `src`/`evaluator.c` within `evaluator_init()`, we instantiate a `value_stack` as such:
-
+Infix tokenization of code (lines 3-6):
 ```
-evaluator->stack = value_stack_init(tokens_amt);
-```
-
-We can integrate the new generic stack class by calling `stack_t()` to define a new stack type and call `stack_init()` to initialize the type's stack class as seen below:
-
-```
-stack(int);
-
-void foo() {
-    int_stack s;
-    stack_init(s);
-}
+[while, guess, !=, "cool", left_curly, code, right_curly]
 ```
 
-### 2. Stack Methods
+Infix -> Postfix process:
+- When while token is read
+  - Place left_curly in postfix array
+  - Set scanner flag knowing we are expecting a left_curly for the while token.
+- Convert condition regularly
+- When left_curly token is read
+  - Check our scanner flag if this is part of while loop
+  - Place while in postfix array
+- Tokenize the rest of the code as usual.
 
-Whenever we need to call a stack method, we should resort to calling the following macro defined functions:
-
-- `stack_t(type)` 
-- `stack_init(s)` 	
-- `stack_clear(s)`	
-- `stack_delete(s)` 	
-- `stack_peek(s)`	
-- `stack_pop(s)` 		
-- `stack_ptr(s)`
-- `stack_size(s)`
-
-### 3. Passing Stacks to Functions
-
-Several methods that take one of the hard-coded stack types as an argument such as the following `scanner` class methods:
-
+Postfix tokenization of code (lines 3-6):
 ```
-void _scanner_find_left_parentheses(token ***result, token_stack *token_stack, int *j);
-
-void _scanner_handle_operator(scanner *scanner, token **result, token_stack *token_stack, token* curr_token, int *j);
+[left_curly, guess, "cool", !=, while, code, right_curly]
 ```
 
-We can instead pass in our stack data types defined via `stack_t()` as such:
+Evaluation Algorithm:
+- Treat while token like an if token
+  - If condition is false, skip to right_curly with same depth of while token
+  - If condition is true:
+    - Save original postfix sequence of tokens in condition_array.
+    - Save index of token that begins code within while loop
+    - Evaluate tokens after while token.
+    - If break token is read:
+      - Skip past right curly brace with equal depth to while token
+    - If right curly brace with equal depth to while token is found:
+      - Evaluate condition array
+      - If condition array's result is true
+        - Step back to index of token that begins code within while loop
 
-```
-typedef struct token* ptoken;
-
-stack_t(ptoken);
-
-void _scanner_find_left_parentheses(token ***result, ptoken *token_stack, int *j);
-
-void _scanner_handle_operator(scanner *scanner, token **result, ptoken *token_stack, token* curr_token, int *j);
-```
+To-do:
+- Tokenize while and break tokens - DONE
+- Implement infix -> postfix tokenization for while and break tokens. - DONE
+  - Pass in scanner class to _scanner_handle_operator()
+  - Create flag for whether or not we are between a while token and left_curly
+- Write helper methods to shorten _scanner_identifier() to be <50 lines
+- Make Evaluator solve while loops in tokens array.
+  - Add support for while op_tokens in value_unary_operation()
+  - Create logic for Evaluator to create a saved while condition before entering while loop
