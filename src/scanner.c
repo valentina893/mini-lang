@@ -13,8 +13,7 @@ char _scanner_prev(scanner *scanner) {
 
 void _scanner_postfix(scanner *scanner) {
     if (scanner != NULL) {
-        ptoken_stack token_stack;
-        stack_init(token_stack);
+        ststack token_stack = ststack_init(scanner->tokens_amt);
         int j = 0;
         token **result = (struct token**)malloc(sizeof(struct token*) * scanner->tokens_amt);
         for (int i = 0; i < scanner->tokens_amt; i++) { result[i] = NULL;}
@@ -25,7 +24,7 @@ void _scanner_postfix(scanner *scanner) {
                     case INTEGER:
                     case BREAK:
                     case STRING: result[j] = curr_token; j++; break;
-                    case LEFT_PARENTHESES: stack_push(token_stack, curr_token); break; // push '(' to stack immediately
+                    case LEFT_PARENTHESES: ststack_push(&token_stack, curr_token); break; // push '(' to stack immediately
                     case RIGHT_PARENTHESES: _scanner_find_left_parentheses(&result, &token_stack, &j); break; // pop until '(' is found
                     case EQUAL: // operators
                     case EQUAL_EQUAL:
@@ -46,7 +45,7 @@ void _scanner_postfix(scanner *scanner) {
                     case LEFT_CURLY:
                         if (scanner->reading_while == 1) scanner->reading_while = 0;
                     case SEMICOLON:
-                        while (stack_size(token_stack) > 0) result[j++] = stack_pop(token_stack); 
+                        while (ststack_size(&token_stack) > 0) result[j++] = ststack_pop(&token_stack); 
                         break; // pop remaining operators
                     case RIGHT_CURLY: result[j++] = curr_token; break;
                     default: break;
@@ -61,28 +60,28 @@ void _scanner_postfix(scanner *scanner) {
     }
 }
 
-void _scanner_find_left_parentheses(token ***result, ptoken_stack *token_stack, int *j) {
-    while (stack_size(*token_stack) > 0 && 
-            stack_peek(*token_stack)->type != LEFT_PARENTHESES &&
-            stack_peek(*token_stack)->type != FUNCTION) {
-        (*result)[(*j)++] = stack_pop(*token_stack);
+void _scanner_find_left_parentheses(token ***result, ststack *token_stack, int *j) {
+    while (ststack_size(token_stack) > 0 && 
+            ststack_peek(token_stack)->type != LEFT_PARENTHESES &&
+            ststack_peek(token_stack)->type != FUNCTION) {
+        (*result)[(*j)++] = ststack_pop(token_stack);
     }
-    if (stack_peek(*token_stack)->type != FUNCTION) {
-        stack_pop(*token_stack);
+    if (ststack_peek(token_stack)->type != FUNCTION) {
+        ststack_pop(token_stack);
     }
 }
 
-void _scanner_handle_operator(scanner *scanner, token **result, ptoken_stack *token_stack, token* curr_token, int *j) {
+void _scanner_handle_operator(scanner *scanner, token **result, ststack *token_stack, token* curr_token, int *j) {
     if (curr_token->type == WHILE) {
         result[*j] = token_init(LEFT_CURLY, "{", 1, 0, 0); (*j)++;
         scanner->reading_while = 1;
 
     }
-    while (stack_size(*token_stack) > 0 && stack_peek(*token_stack)->type != LEFT_PARENTHESES
-            && token_prec(stack_peek(*token_stack)) >= token_prec(curr_token)) {
-        result[*j] = stack_pop(*token_stack); (*j)++;
+    while (ststack_size(token_stack) > 0 && ststack_peek(token_stack)->type != LEFT_PARENTHESES
+            && token_prec(ststack_peek(token_stack)) >= token_prec(curr_token)) {
+        result[*j] = ststack_pop(token_stack); (*j)++;
     }
-    stack_push(*token_stack, curr_token);
+    ststack_push(token_stack, curr_token);
 }
 
 void _scanner_resize_tokens(scanner *scanner) {
