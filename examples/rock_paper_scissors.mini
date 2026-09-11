@@ -48,7 +48,7 @@ while game_over == 0 {
             choice1 = "2";
         }
     } else {
-        
+        choice1 == "1";
     }
 
 
