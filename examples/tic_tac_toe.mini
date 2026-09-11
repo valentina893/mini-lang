@@ -1,0 +1,195 @@
+p1 = "-";
+p2 = "-";
+p3 = "-";
+p4 = "-";
+p5 = "-";
+p6 = "-";
+p7 = "-";
+p8 = "-";
+p9 = "-";
+
+player = "X";
+moves = 0;
+game_over = 0;
+
+print("TIC TAC TOE");
+
+while game_over == 0 {
+
+    print(" ");
+    print("Player:");
+    print(player);
+    print("Enter position 1-9:");
+
+    position = input();
+
+
+    if position == "1" {
+        if p1 == "-" {
+            p1 = player;
+            moves = moves + 1;
+        } else {
+            print("Position already taken.");
+        }
+    } elif position == "2" {
+        if p2 == "-" {
+            p2 = player;
+            moves = moves + 1;
+        } else {
+            print("Position already taken.");
+        }
+    } elif position == "3" {
+        if p3 == "-" {
+            p3 = player;
+            moves = moves + 1;
+        } else {
+            print("Position already taken.");
+        }
+    } elif position == "4" {
+        if p4 == "-" {
+            p4 = player;
+            moves = moves + 1;
+        } else {
+            print("Position already taken.");
+        }
+    } elif position == "5" {
+        if p5 == "-" {
+            p5 = player;
+            moves = moves + 1;
+        } else {
+            print("Position already taken.");
+        }
+    } elif position == "6" {
+        if p6 == "-" {
+            p6 = player;
+            moves = moves + 1;
+        } else {
+            print("Position already taken.");
+        }
+    } elif position == "7" {
+        if p7 == "-" {
+            p7 = player;
+            moves = moves + 1;
+        } else {
+            print("Position already taken.");
+        }
+    } elif position == "8" {
+        if p8 == "-" {
+            p8 = player;
+            moves = moves + 1;
+        } else {
+            print("Position already taken.");
+        }
+    } elif position == "9" {
+        if p9 == "-" {
+            p9 = player;
+            moves = moves + 1;
+        } else {
+            print("Position already taken.");
+        }
+    } else {
+        print("Invalid position.");
+    }
+
+
+    if p1 == player {
+        if p2 == player {
+            if p3 == player {
+                print("Winner:");
+                print(player);
+                game_over = 1;
+            }
+        }
+    }
+
+    if p4 == player {
+        if p5 == player {
+            if p6 == player {
+                print("Winner:");
+                print(player);
+                game_over = 1;
+            }
+        }
+    }
+
+    if p7 == player {
+        if p8 == player {
+            if p9 == player {
+                print("Winner:");
+                print(player);
+                game_over = 1;
+            }
+        }
+    }
+
+
+    if p1 == player {
+        if p4 == player {
+            if p7 == player {
+                print("Winner:");
+                print(player);
+                game_over = 1;
+            }
+        }
+    }
+
+    if p2 == player {
+        if p5 == player {
+            if p8 == player {
+                print("Winner:");
+                print(player);
+                game_over = 1;
+            }
+        }
+    }
+
+    if p3 == player {
+        if p6 == player {
+            if p9 == player {
+                print("Winner:");
+                print(player);
+                game_over = 1;
+            }
+        }
+    }
+
+
+    if p1 == player {
+        if p5 == player {
+            if p9 == player {
+                print("Winner:");
+                print(player);
+                game_over = 1;
+            }
+        }
+    }
+
+    if p3 == player {
+        if p5 == player {
+            if p7 == player {
+                print("Winner:");
+                print(player);
+                game_over = 1;
+            }
+        }
+    }
+
+
+    if moves == 9 {
+        if game_over == 0 {
+            print("Draw!");
+            game_over = 1;
+        }
+    }
+
+
+    if game_over == 0 {
+        if player == "X" {
+            player = "O";
+        } else {
+            player = "X";
+        }
+    }
+}
+
+print("Game over.");
