@@ -1,63 +1,41 @@
 # mini-lang
 
-This branch is for implementing conditional loops in mini-lang.
+This branch is for debugging if-statements.
 
-Currently, this branch supports single-nested while loops with break statements.
-You can view some examples in [`fibonacci.mini`](examples/fibonacci.mini) and [`while.mini`](examples/while.mini).
+Our goal is to write many test programs and see where mini-lang breaks and document/fix them.
 
-We are still implementing nested loops.
+## Bug Log:
+
+### 9/9: The `if-stack` can hold on to `IF`/`ELIF` tokens and never pop them out. 
+
+Old `IF`/`ELIF` tokens can be stored in the stack and never get popped out since we only pop out conditional tokens if we see an `ELSE` token. However, conditional branches may not always have an `ELSE` token as seen in the below example:
 
 Example Code:
 ```
-1 print("guess the word i'm thinking of...");
-2 guess = input();
-3 while guess != "cool" {
-4     print("try again!");
-5     guess = input();
-6 }
-7 print("good job!");
+1  if 1 {
+2    print(1);
+3  }
+4   
+5  if 0 {
+6    print("null");
+7  } elif 1 {
+8    print(2);
+9  }
 ```
 
-Infix tokenization of code (lines 3-6):
+Expected Output:
 ```
-[while, guess, !=, "cool", left_curly, code, right_curly]
-```
-
-Infix -> Postfix process:
-- When while token is read
-  - Place left_curly in postfix array
-  - Set scanner flag knowing we are expecting a left_curly for the while token.
-- Convert condition regularly
-- When left_curly token is read
-  - Check our scanner flag if this is part of while loop
-  - Place while in postfix array
-- Tokenize the rest of the code as usual.
-
-Postfix tokenization of code (lines 3-6):
-```
-[left_curly, guess, "cool", !=, while, code, right_curly]
+1
+2
 ```
 
-Evaluation Algorithm:
-- Treat while token like an if token
-  - If condition is false, skip to right_curly with same depth of while token
-  - If condition is true:
-    - Save original postfix sequence of tokens in condition_array.
-    - Save index of token that begins code within while loop
-    - Evaluate tokens after while token.
-    - If break token is read:
-      - Skip past right curly brace with equal depth to while token
-    - If right curly brace with equal depth to while token is found:
-      - Evaluate condition array
-      - If condition array's result is true
-        - Step back to index of token that begins code within while loop
+Current Output:
+```
+1
+```
 
-To-do:
-- Tokenize while and break tokens - DONE
-- Implement infix -> postfix tokenization for while and break tokens. - DONE
-  - Pass in scanner class to _scanner_handle_operator()
-  - Create flag for whether or not we are between a while token and left_curly
-- Write helper methods to shorten _scanner_identifier() to be <50 lines
-- Make Evaluator solve while loops in tokens array.
-  - Add support for while op_tokens in value_unary_operation()
-  - Create logic for Evaluator to create a saved while condition before entering while loop
+The `IF` token on line 1 stays in the `if-stack` and when we reach the `ELIF` token on line 7, we check our `if-stack`'s top token and misinterpret as being part of the same conditional branch. Since the `IF` token remains in the stack, we skip this `ELIF` branch when we should have entered it.
+
+Current Solution as of 9/10:
+- For each `IF`/`ELIF` token we read, we pop out any existing tokens in the `if-stack` that have a greater-than or equal depth.
+- This code is implemented in `_evaluator_handle_unary_operation()` in lines 250-258.
