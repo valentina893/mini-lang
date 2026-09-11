@@ -2,7 +2,7 @@
 
 This branch is for debugging if-statements.
 
-Our goal is to write many test programs and see where mini-lang breaks and document/fix them.
+Our goal is to write many test programs and see where mini-lang breaks and document/fix them. We are also fixing any errors/bugs found on other platforms like WSL.
 
 ## Bug Log:
 
