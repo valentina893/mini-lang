@@ -246,7 +246,7 @@ variable *variable_init(int id_size, char *id, value *value) {
 
     variable *variable = (struct variable*)malloc(sizeof(struct variable));
     variable->id_size = id_size;
-    variable->id = (char*)malloc(sizeof(char) * id_size);
+    variable->id = (char*)malloc(sizeof(char) * (id_size+1));
     strncpy(variable->id, id, id_size);
     variable->id[id_size] = '\0';
     variable->value = value;
