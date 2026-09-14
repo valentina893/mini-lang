@@ -18,7 +18,7 @@ value *value_init_string(int len, char *data) {
     value *value = (struct value*)malloc(sizeof(struct value));
     value->type = V_STRING;
     value->len = len;
-    value->string = (char*)malloc(sizeof(char) * len);
+    value->string = (char*)malloc(sizeof(char) * (len+1));
     strncpy(value->string, data, len);
     value->string[len] = '\0';
     return value;
@@ -145,7 +145,9 @@ value *value_unary_operation(value *val, token *op_token) {
     value *val_temp = val;
     if (val != NULL && op_token != NULL) {
         if (val->type == V_VARIABLE) val = val->variable->value;
-        if (op_token->type == IF || op_token->type == ELIF) {
+        if (op_token->type == IF || 
+            op_token->type == ELIF || 
+            op_token->type == WHILE) {
             if (val->type == V_INTEGER) {
                 res = value_init_int(val->integer);
             }
@@ -234,60 +236,17 @@ void value_print(value *a) {
 
 value *value_input() {
     char buf[1024];
-    fgets(buf, sizeof(buf), stdin);
+    char *res = fgets(buf, sizeof(buf), stdin);
+    if (res == NULL) return NULL;
     buf[strcspn(buf, "\n")] = '\0';
     return value_init_string(strlen(buf), buf);
-}
-
-value_stack *value_stack_init(int size) {
-    value_stack *value_stack = (struct value_stack*)malloc(sizeof(struct value_stack));
-    value_stack->top = -1;
-    value_stack->capacity = size;
-    value_stack->data = (struct value**)malloc(sizeof(struct value*) * size);
-    return value_stack;
-}
-
-value *value_stack_pop(value_stack *value_stack) {
-    if (value_stack != NULL && value_stack->top != -1) {
-        return value_stack->data[value_stack->top--];
-    }
-    return NULL;
-}
-
-void value_stack_push(value_stack *value_stack, value *value) {
-    if (value_stack != NULL && value != NULL) {
-        value_stack->data[++value_stack->top] = value;
-    }
-}
-
-void value_stack_delete(value_stack *value_stack) {
-    if (value_stack != NULL) {
-        for (int i = 0; i < value_stack->capacity; i++) {
-            value_delete(value_stack->data[i]);
-        }
-        free(value_stack);
-    }
-}
-
-int value_stack_is_empty(value_stack *value_stack) {
-    if (value_stack != NULL) {
-        if (value_stack->top > -1) return 0;
-    }
-    return 1;
-}
-
-value *value_stack_top(value_stack *value_stack) {
-    if (value_stack != NULL && value_stack->top > -1) {
-        return value_stack->data[value_stack->top];
-    }
-    return NULL;
 }
 
 variable *variable_init(int id_size, char *id, value *value) {
 
     variable *variable = (struct variable*)malloc(sizeof(struct variable));
     variable->id_size = id_size;
-    variable->id = (char*)malloc(sizeof(char) * id_size);
+    variable->id = (char*)malloc(sizeof(char) * (id_size+1));
     strncpy(variable->id, id, id_size);
     variable->id[id_size] = '\0';
     variable->value = value;

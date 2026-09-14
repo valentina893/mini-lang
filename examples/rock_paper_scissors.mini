@@ -1,0 +1,188 @@
+print("ROCK PAPER SCISSORS");
+print(" ");
+
+print("Select game mode:");
+print("1 - Single Player");
+print("2 - Multiplayer");
+
+mode = input();
+
+if mode != "1" {
+    if mode != "2" {
+        mode = "1";
+    } else {
+        mode = "2";
+    }
+} else {
+    mode = "1";
+}
+
+
+player1_wins = 0;
+player2_wins = 0;
+round = 1;
+game_over = 0;
+
+
+while game_over == 0 {
+
+    print(" ");
+    print("ROUND:");
+    print(round);
+
+    print("Player 1, choose:");
+    print("1 - Rock");
+    print("2 - Paper");
+    print("3 - Scissors");
+
+    choice1 = input();
+
+    if choice1 != "1" {
+        if choice1 != "2" {
+            if choice1 != "3" {
+                choice1 == "1";
+            } else {
+                choice1 = "3";
+            }
+        } else {
+            choice1 = "2";
+        }
+    } else {
+        choice1 == "1";
+    }
+
+
+    if mode == "1" {
+
+        ai_number = random(2);
+        ai_number = ai_number + 1;
+
+        if ai_number == 1 {
+            choice2 = "1";
+        } elif ai_number == 2 {
+            choice2 = "2";
+        } else {
+            choice2 = "3";
+        }
+
+        print("AI has made its choice.");
+
+    } else {
+
+        print("Player 2, choose:");
+        print("1 - Rock");
+        print("2 - Paper");
+        print("3 - Scissors");
+
+        choice2 = input();
+
+        if choice2 != "1" {
+            if choice2 != "2" {
+                if choice2 != "3" {
+                    choice2 = "1";
+                } else {
+                    choice2 = "3";
+                }
+            } else {
+                choice2 = "2";
+            }
+        } else {
+            choice2 = "1";
+        }
+    }
+
+
+    print(" ");
+    print("Player 1 chose:");
+    
+    if choice1 == "1" {
+        print("Rock");
+    } elif choice1 == "2" {
+        print("Paper");
+    } else {
+        print("Scissors");
+    }
+
+
+    print("Player 2 chose:");
+
+    if choice2 == "1" {
+        print("Rock");
+    } elif choice2 == "2" {
+        print("Paper");
+    } else {
+        print("Scissors");
+    }
+
+
+    round_winner = 0;
+
+
+    if choice1 == choice2 {
+        print("Round is a draw.");
+        round_winner = 0;
+    } else {
+
+        if choice1 == "1" {
+            if choice2 == "3" {
+                print("Player 1 wins the round!");
+                player1_wins = player1_wins + 1;
+                round_winner = 1;
+            } else {
+                print("Player 2 wins the round!");
+                player2_wins = player2_wins + 1;
+                round_winner = 2;
+            }
+        } elif choice1 == "2" {
+            if choice2 == "1" {
+                print("Player 1 wins the round!");
+                player1_wins = player1_wins + 1;
+                round_winner = 1;
+            } else {
+                print("Player 2 wins the round!");
+                player2_wins = player2_wins + 1;
+                round_winner = 2;
+            }
+        } else {
+            if choice2 == "2" {
+                print("Player 1 wins the round!");
+                player1_wins = player1_wins + 1;
+                round_winner = 1;
+            } else {
+                print("Player 2 wins the round!");
+                player2_wins = player2_wins + 1;
+                round_winner = 2;
+            }
+        }
+    }
+
+
+    print(" ");
+    print("Score:");
+    print("Player 1:");
+    print(player1_wins);
+    print("Player 2:");
+    print(player2_wins);
+
+
+    if player1_wins == 2 {
+        print(" ");
+        print("Player 1 wins the game!");
+        game_over = 1;
+    } elif player2_wins == 2 {
+        print(" ");
+        print("Player 2 wins the game!");
+        game_over = 1;
+    } else {
+        round = round + 1;
+    }
+}
+
+
+print(" ");
+print("FINAL SCORE:");
+print("Player 1:");
+print(player1_wins);
+print("Player 2:");
+print(player2_wins);
+print("Game over.");

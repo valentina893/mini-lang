@@ -11,6 +11,6 @@ typedef struct args {
 
 args *args_init(int argc, char **argv);
 
-void args_delete(args *args);
+void args_delete(args **args);
 
 #endif

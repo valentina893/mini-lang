@@ -5,8 +5,6 @@
 
 #include "token.h"
 
-//typedef struct variable* variable_ptr;
-
 /*
 Data type of the value. Could also be an error or variable* placeholder.
 */
@@ -26,11 +24,6 @@ typedef struct value {
         struct variable *variable;
     };
 } value;
-
-typedef struct value_stack {
-    int top, capacity;
-    value **data;
-} value_stack;
 
 /*
 Variable class for storing needed data.
@@ -100,36 +93,6 @@ void value_print(value *a);
 Handles unary operation for a value such as if-statements.
 */
 value *value_unary_operation(value *val, token *op_token);
-
-/*
-Initializes empty value stack.
-*/
-value_stack *value_stack_init(int size);
-
-/*
-Removes and returns top value in value stack.
-*/
-value *value_stack_pop(value_stack *value_stack);
-
-/*
-Pushes new top value to value stack.
-*/
-void value_stack_push(value_stack *value_stack, value *value);
-
-/*
-Frees dynamically allocated value_stack.
-*/
-void value_stack_delete(value_stack *value_stack);
-
-/*
-Returns 1 if empty, else 0.
-*/
-int value_stack_is_empty(value_stack *value_stack);
-
-/*
-Returns value at the top of the stack.
-*/
-value *value_stack_top(value_stack *value_stack);
 
 /*
 Initializes variable with a type, id, and stored data.

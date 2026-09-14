@@ -3,6 +3,16 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 
+#define STACK_T struct token*
+#define STACK_PREFIX tstack_
+#define STACK_NAME tstack
+#include "stack.h"
+
+#define STACK_T struct value*
+#define STACK_PREFIX vstack_
+#define STACK_NAME vstack
+#include "stack.h"
+
 #include "token.h"
 #include "variable.h"
 
@@ -13,10 +23,16 @@ typedef struct evaluator {
     int tokens_idx;
     int tokens_amt;
     int variable_amt;
-    value_stack *stack;
-    token_stack *if_stack;
+    vstack stack;
+    tstack if_stack;
     token **tokens;
     variable **memory;
+
+    token **while_condition;
+    int while_cond_size;
+    int while_start;
+    int while_depth;
+    int while_flag;
 } evaluator;
 
 /*
@@ -58,6 +74,21 @@ int _evaluator_handle_binary_operation(evaluator *evaluator, token *curr_token);
 Evaluates function calls.
 */
 int _evaluator_handle_function(evaluator *evaluator, token *curr_token);
+
+/*
+Skips tokens until a target token with equal type and literal is found.
+*/
+void _evaluator_skip_tokens(evaluator *evaluator, token *target);
+
+/*
+Saves tokens representing conditional expression for while loop for re-evaluation.
+*/
+void _evaluator_save_while_condition(evaluator *evaluator);
+
+/*
+Re-evaluates while condition and returns it's boolean (integer) result of 1 or 0.
+*/
+int _evaluator_solve_while_condition(evaluator *evaluator);
 
 /*
 Evaluates unary operation such as if (boolean) {}
