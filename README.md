@@ -20,5 +20,5 @@ In order to keep our `token` class and methods abstract, we will preserve the cu
 This protocol should be in every spot we allocate memory for a char array like `value_init_string()`.
 
 Current Solution as of 9/13:
-- We have changed `token_init()` and `value_init_string()` to allocate memory of size+1 for the lexeme char array.
-- After implementing this change, we were able to run the `rock_paper_scissors.mini` program on WSL with no errors.
+- We have changed `token_init()`, `value_init_string()`, and `variable_init()` to allocate memory of size+1 for the lexeme char array.
+- After implementing this change, we were able to run the `rock_paper_scissors.mini` program on WSL with no errors. We also managed to get rid of all invalid read/write errors when running Valgrind.
