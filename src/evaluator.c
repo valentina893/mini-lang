@@ -247,15 +247,13 @@ int _evaluator_solve_while_condition(evaluator *evaluator) {
 int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
     if (evaluator != NULL && curr_token != NULL) {
 
-        // for each curr IF token, we pop prev IF tokens from if-stack with >= depth
+        // for each curr IF token, we pop prev IF tokens from if-stack with <= depth
         if (curr_token->type == IF && tstack_size(&evaluator->if_stack) > 0) {
             token *top = tstack_peek(&evaluator->if_stack);
             while (tstack_size(&evaluator->if_stack) > 0 &&
-                    (top->type == IF) && 
+                    (top->type == IF || top->type == ELIF) && 
                     top->literal >= curr_token->literal) {
-                        token *pop = tstack_pop(&evaluator->if_stack);
-                        //printf("popping from if_stack:\n");
-                        //token_print(pop);
+                        tstack_pop(&evaluator->if_stack);
             }
         }
 
@@ -263,26 +261,25 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
         value *res = NULL;
         value *a = NULL;
         if (curr_token->type == ELIF || curr_token->type == ELSE) {
-            token *top = tstack_peek(&evaluator->if_stack);
-            if (top != NULL) {
-                // check if top has == depth to curr_token, we skip if it does
-                if (curr_token->literal == top->literal) {
-                    skip = 1;
-                } else if (curr_token->literal < top->literal) {
-                    // pop from stack until empty or we find a conditional token with == depth
-                    while (tstack_peek(&evaluator->if_stack) > 0) {
-                        token *pop = tstack_pop(&evaluator->if_stack);
-                        //printf("popping from if_stack:\n");
-                        //token_print(pop);
-                        top = tstack_pop(&evaluator->if_stack);
-                        if (curr_token->literal == top->literal) {skip = 1; break;}
+            if (tstack_size(&evaluator->if_stack) > 0) {
+                token *top = tstack_peek(&evaluator->if_stack);
+                if (top != NULL) {
+                    // check if top has == depth to curr_token, we skip if it does
+                    if (curr_token->literal == top->literal) {
+                        skip = 1;
+                    } else if (curr_token->literal < top->literal) {
+                        // pop from stack until empty or we find a conditional token with == depth
+                        while (tstack_size(&evaluator->if_stack) > 0 ||
+                            tstack_peek(&evaluator->if_stack)->literal == curr_token->literal) {
+                            tstack_pop(&evaluator->if_stack);
+                            top = tstack_pop(&evaluator->if_stack);
+                            if (curr_token->literal == top->literal) {skip = 1; break;}
+                        }
                     }
-                }
-                // climb +1 in depth
-                if (curr_token->type == ELSE && curr_token->literal == top->literal) {
-                    top = tstack_pop(&evaluator->if_stack); 
-                    //printf("popping from if_stack:\n"); 
-                    //token_print(top);
+                    // climb +1 in depth
+                    if (curr_token->type == ELSE && curr_token->literal == top->literal) {
+                        top = tstack_pop(&evaluator->if_stack); 
+                    }
                 }
             }
         }

@@ -75,8 +75,9 @@ STACK_init(size_t m);
 STACK_LINKAGE
 STACK_NAME
 STACK_init(size_t m) {
-	STACK_NAME s = (STACK_NAME){.n = 0, .m = m, .data = calloc(s.m, sizeof(*s.data))};
-    return s;
+	STACK_NAME s = (STACK_NAME){.n = 0, .m = m, .data = NULL};
+  s.data = calloc(s.m, sizeof(*s.data));
+  return s;
 }
 #endif
 
