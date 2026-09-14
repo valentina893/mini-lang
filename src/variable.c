@@ -18,7 +18,7 @@ value *value_init_string(int len, char *data) {
     value *value = (struct value*)malloc(sizeof(struct value));
     value->type = V_STRING;
     value->len = len;
-    value->string = (char*)malloc(sizeof(char) * len);
+    value->string = (char*)malloc(sizeof(char) * (len+1));
     strncpy(value->string, data, len);
     value->string[len] = '\0';
     return value;
