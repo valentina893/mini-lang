@@ -1,0 +1,20 @@
+dec = 1700;
+bin = "0b";
+
+powers = 1;
+
+while (powers * 2) < dec {
+    powers = powers * 2;
+}
+
+while powers > 0 {
+    if dec - powers >= 0 {
+        dec = dec - powers;
+        bin = bin + "1";
+    } else {
+        bin = bin + "0";
+    }
+    powers = powers / 2;
+}
+
+print(bin);
