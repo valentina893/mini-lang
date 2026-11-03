@@ -193,6 +193,7 @@ void _evaluator_save_while_condition(evaluator *evaluator) {
         }
         i++;
         int size = evaluator->tokens_idx - i;
+        evaluator->while_cond_size = 0;
         evaluator->while_condition = (struct token**)malloc(sizeof(struct token*) * size);
         for (; i < evaluator->tokens_idx; i++) {
             evaluator->while_condition[evaluator->while_cond_size++] = evaluator->tokens[i];
