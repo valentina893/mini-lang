@@ -1,20 +1,15 @@
-dec = 1700;
-bin = "0b";
+dec = 1500;
+bin = "";
 
-pow = 1;
-
-while pow * 2 < dec {
-    pow = pow * 2;
-}
-
-while pow > 0 {
-    if dec - pow >= 0 {
-        dec = dec - pow;
-        bin = bin + "1";
+while dec > 0 {
+    prev_dec = dec;
+    dec = dec / 2;
+    rem = prev_dec - (2 * dec);
+    if rem == 1 {
+        bin = "1" + bin;
     } else {
-        bin = bin + "0";
+        bin = "0" + bin;
     }
-    pow = pow / 2;
 }
 
-print(bin);
+print("0b" + bin);
