@@ -1,4 +1,4 @@
-cc = gcc
+cc ?= gcc
 target = mini
 
 src_dir = src
