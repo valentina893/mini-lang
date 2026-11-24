@@ -71,6 +71,6 @@ void token_print_type(token *token);
 /*
 Frees dynamically allocated fields and token.
 */
-void token_delete(token *token);
+void token_delete(token **token);
 
 #endif
