@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
         scanner *scanner = scanner_init(args, token_amt);
         if (scanner != NULL) {
             if (scanner_get_tokens(scanner) == 1) {
-                evaluator *evaluator =  evaluator_init(scanner->tokens_amt, scanner->tokens);
+                evaluator *evaluator =  evaluator_init(scanner->tokens_amt, stvector_ptr(&scanner->tokens));
                 evaluator_run(evaluator);
             }
             // free evaluator
