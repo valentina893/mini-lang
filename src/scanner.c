@@ -13,12 +13,12 @@ char _scanner_prev(scanner *scanner) {
 
 void _scanner_postfix(scanner *scanner) {
     if (scanner != NULL) {
-        ststack token_stack = ststack_init(scanner->tokens_amt);
+        ststack token_stack = ststack_init(stvector_size(&scanner->tokens));
         //int j = 0;
         //token **result = (struct token**)malloc(sizeof(struct token*) * scanner->tokens_amt);
-        stvector result = stvector_init(scanner->tokens_amt);
+        stvector result = stvector_init(stvector_size(&scanner->tokens));
         for (size_t i = 0; i < result.m; i++) { result.data[i] = NULL;}
-        for (size_t i = 0; i < scanner->tokens_amt; i++) {
+        for (size_t i = 0; i < stvector_size(&scanner->tokens); i++) {
             token *curr_token = NULL;
             if (stvector_at(&scanner->tokens, i, &curr_token) == 1) {
                 if (curr_token != NULL) {
@@ -59,7 +59,6 @@ void _scanner_postfix(scanner *scanner) {
         // set tokens array to result
         token **to_free = stvector_ptr(&scanner->tokens);
         scanner->tokens = result;
-        scanner->tokens_amt = stvector_size(&result);
         free(to_free);
     }
 }
@@ -68,7 +67,6 @@ void _scanner_find_left_parentheses(stvector *result, ststack *token_stack) {
     while (ststack_size(token_stack) > 0 && 
             ststack_peek(token_stack)->type != LEFT_PARENTHESES &&
             ststack_peek(token_stack)->type != FUNCTION) {
-        //(*result)[(*j)++] = ststack_pop(token_stack);
         stvector_push(result, ststack_pop(token_stack));
     }
     if (ststack_peek(token_stack)->type != FUNCTION) {
@@ -78,14 +76,12 @@ void _scanner_find_left_parentheses(stvector *result, ststack *token_stack) {
 
 void _scanner_handle_operator(scanner *scanner, stvector *result, ststack *token_stack, token* curr_token) {
     if (curr_token->type == WHILE) {
-        //result[*j] = token_init(LEFT_CURLY, "{", 1, 0, 0); (*j)++;
         stvector_push(result, token_init(LEFT_CURLY, "{", 1, 0, 0));
         scanner->reading_while = 1;
 
     }
     while (ststack_size(token_stack) > 0 && ststack_peek(token_stack)->type != LEFT_PARENTHESES
             && token_prec(ststack_peek(token_stack)) >= token_prec(curr_token)) {
-        //result[*j] = ststack_pop(token_stack); (*j)++;
         stvector_push(result, ststack_pop(token_stack));
     }
     ststack_push(token_stack, curr_token);
@@ -126,8 +122,6 @@ char _scanner_advance(scanner *scanner) {
 void _scanner_add_token(scanner *scanner, token_type type, char *value_start, const int length, int literal) {
     if (scanner != NULL) {
         stvector_push(&scanner->tokens, token_init(type, value_start, length, literal, scanner->line));
-        //scanner->tokens[scanner->tokens_amt] = token_init(type, value_start, length, literal, scanner->line);
-        scanner->tokens_amt++;
     }
 }
 
@@ -373,7 +367,6 @@ scanner *scanner_init(args *args, size_t tokens_max) {
 
                     // init other scanner attributes
                     scanner->tokens = stvector_init(tokens_max);
-                    scanner->tokens_amt = 0;
                     scanner->tokens_max = tokens_max;
                     scanner->start = 0;
                     scanner->current = 0;
@@ -418,8 +411,6 @@ int scanner_get_tokens(scanner *scanner) {
         }
 
         stvector_push(&scanner->tokens, token_init(END, NULL, 0, 0, scanner->line));
-        //scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, 0, scanner->line);
-        //scanner->tokens_amt++;
 
         if (scanner->successful == 1) {
             if (scanner->tokens_infix == 1) {
@@ -456,8 +447,6 @@ void scanner_delete(scanner *scanner) {
         
         // free token array
         stvector_delete(&scanner->tokens);
-        //free(scanner->tokens);
-        scanner->tokens_amt = 0;
 
         // free char* storing src
         free(scanner->src);
