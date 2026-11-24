@@ -10,6 +10,11 @@
 #define STACK_NAME ststack
 #include "stack.h"
 
+#define VECTOR_T struct token*
+#define VECTOR_PREFIX stvector_
+#define VECTOR_NAME stvector
+#include "vector.h"
+
 #include "args.h"
 #include "token.h"
 
@@ -19,14 +24,15 @@ Scans source code and "tokenizes" it.
 typedef struct scanner {
     
     // all stored tokens
-    token **tokens;
+    //token **tokens;
+    stvector tokens;
 
     // full source code
     char *src;
     long src_size;
 
     // size and capacity of tokens array
-    int tokens_amt, tokens_max;
+    size_t tokens_amt, tokens_max;
 
     // first char in lexeme
     int start;
@@ -62,12 +68,12 @@ void _scanner_postfix(scanner *scanner);
 /*
 Pops operators out of token stack and appends to postfix array until '(' is found.
 */
-void _scanner_find_left_parentheses(token ***result, ststack *token_stack, int *j);
+void _scanner_find_left_parentheses(stvector *result, ststack *token_stack);
 
 /*
 Pops operators from token stack until current token has lower precedence than top. Current token is then pushed to stack.
 */
-void _scanner_handle_operator(scanner *scanner, token **result, ststack *token_stack, token* curr_token, int *j);
+void _scanner_handle_operator(scanner *scanner, stvector *result, ststack *token_stack, token *curr_token);
 
 /*
 Resizes tokens array to be double its current maximum capacity.
@@ -142,7 +148,7 @@ void _scanner_tokenize(scanner *scanner);
 /*
 Initializes scanner class with all contents of src file in char array.
 */
-scanner *scanner_init(args *args, int tokens_max);
+scanner *scanner_init(args *args, size_t tokens_max);
 
 /*
 Fill tokens array by reading content in src.
