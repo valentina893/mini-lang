@@ -17,40 +17,42 @@ void _scanner_postfix(scanner *scanner) {
         //int j = 0;
         //token **result = (struct token**)malloc(sizeof(struct token*) * scanner->tokens_amt);
         stvector result = stvector_init(scanner->tokens_amt);
-        for (size_t i = 0; i < stvector_size(&result); i++) { result.data[i] = NULL;}
+        for (size_t i = 0; i < result.m; i++) { result.data[i] = NULL;}
         for (size_t i = 0; i < scanner->tokens_amt; i++) {
             token *curr_token = NULL;
             if (stvector_at(&scanner->tokens, i, &curr_token) == 1) {
-                switch (curr_token->type) {
-                    case ID: // operands and breaks get pushed to result
-                    case INTEGER:
-                    case BREAK:
-                    case STRING: 
-                    case RIGHT_CURLY: stvector_push(&result, curr_token); break; //result[j] = curr_token; j++; break;
-                    case LEFT_PARENTHESES: ststack_push(&token_stack, curr_token); break; // push '(' to stack immediately
-                    case RIGHT_PARENTHESES: _scanner_find_left_parentheses(&result, &token_stack); break; // pop until '(' is found
-                    case EQUAL: // operators
-                    case EQUAL_EQUAL:
-                    case GREATER:
-                    case GREATER_EQUAL:
-                    case IF:
-                    case ELIF:
-                    case ELSE:
-                    case NOT_EQUAL:
-                    case FUNCTION:
-                    case LESS:
-                    case LESS_EQUAL:
-                    case WHILE:
-                    case MINUS:
-                    case PLUS:
-                    case SLASH:
-                    case STAR: _scanner_handle_operator(scanner, &result, &token_stack, curr_token); break; // pop lower/equal tokens from stack 
-                    case LEFT_CURLY:
-                        if (scanner->reading_while == 1) scanner->reading_while = 0;
-                    case SEMICOLON:
-                        while (ststack_size(&token_stack) > 0) stvector_push(&result, ststack_pop(&token_stack)); 
-                        break; // pop remaining operators
-                    default: break;
+                if (curr_token != NULL) {
+                    switch (curr_token->type) {
+                        case ID: // operands and breaks get pushed to result
+                        case INTEGER:
+                        case BREAK:
+                        case STRING: 
+                        case RIGHT_CURLY: stvector_push(&result, curr_token); break; //result[j] = curr_token; j++; break;
+                        case LEFT_PARENTHESES: ststack_push(&token_stack, curr_token); break; // push '(' to stack immediately
+                        case RIGHT_PARENTHESES: _scanner_find_left_parentheses(&result, &token_stack); break; // pop until '(' is found
+                        case EQUAL: // operators
+                        case EQUAL_EQUAL:
+                        case GREATER:
+                        case GREATER_EQUAL:
+                        case IF:
+                        case ELIF:
+                        case ELSE:
+                        case NOT_EQUAL:
+                        case FUNCTION:
+                        case LESS:
+                        case LESS_EQUAL:
+                        case WHILE:
+                        case MINUS:
+                        case PLUS:
+                        case SLASH:
+                        case STAR: _scanner_handle_operator(scanner, &result, &token_stack, curr_token); break; // pop lower/equal tokens from stack 
+                        case LEFT_CURLY:
+                            if (scanner->reading_while == 1) scanner->reading_while = 0;
+                        case SEMICOLON:
+                            while (ststack_size(&token_stack) > 0) stvector_push(&result, ststack_pop(&token_stack)); 
+                            break; // pop remaining operators
+                        default: break;
+                    }
                 }
             }
         }
@@ -417,7 +419,7 @@ int scanner_get_tokens(scanner *scanner) {
 
         stvector_push(&scanner->tokens, token_init(END, NULL, 0, 0, scanner->line));
         //scanner->tokens[scanner->tokens_amt] = token_init(END, NULL, 0, 0, scanner->line);
-        scanner->tokens_amt++;
+        //scanner->tokens_amt++;
 
         if (scanner->successful == 1) {
             if (scanner->tokens_infix == 1) {
@@ -445,7 +447,7 @@ void scanner_delete(scanner *scanner) {
     if (scanner != NULL) {
 
         // free each token in token array
-        for (size_t i = 0; i < scanner->tokens_amt; i++) {
+        for (size_t i = 0; i < stvector_size(&scanner->tokens); i++) {
             token *t = NULL;
             if (stvector_at(&scanner->tokens, i, &t) == 1) {
                 token_delete(&t);
