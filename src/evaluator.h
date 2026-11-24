@@ -13,6 +13,16 @@
 #define STACK_NAME vstack
 #include "stack.h"
 
+#define VECTOR_T struct token*
+#define VECTOR_PREFIX tvector_
+#define VECTOR_NAME tvector
+#include "vector.h"
+
+#define VECTOR_T struct variable*
+#define VECTOR_PREFIX var_vector_
+#define VECTOR_NAME var_vector
+#include "vector.h"
+
 #include "token.h"
 #include "variable.h"
 
@@ -20,19 +30,19 @@
 Evaluator class that reads tokens and uses stack-based approach to evaluate code.
 */
 typedef struct evaluator {
-    int tokens_idx;
-    int tokens_amt;
-    int variable_amt;
+    size_t tokens_idx;
+    // int tokens_amt;
+    // int variable_amt;
     vstack stack;
     tstack if_stack;
-    token **tokens;
-    variable **memory;
+    tvector tokens;
+    var_vector memory;
 
-    token **while_condition;
-    int while_cond_size;
-    int while_start;
+    tvector while_condition;
+    // int while_cond_size;
+    size_t while_start;
     int while_depth;
-    int while_flag;
+    size_t while_flag;
 } evaluator;
 
 /*
