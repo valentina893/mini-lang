@@ -76,6 +76,28 @@ VECTOR_init(size_t m) {
 }
 #endif
 
+#define VECTOR_init_ptr VECTOR_IMPL(init_ptr)
+
+#ifdef VECTOR_DECLS_ONLY
+
+VECTOR_LINKAGE
+VECTOR_NAME
+VECTOR_init_ptr(VECTOR_T **data, size_t n);
+
+#else
+
+VECTOR_LINKAGE
+VECTOR_NAME
+VECTOR_init_ptr(VECTOR_T **data, size_t n) {
+	VECTOR_NAME v = (VECTOR_NAME){.n = n, .m = n, .data = NULL};
+  v.data = calloc(v.m, sizeof(*v.data));
+  for (size_t i = 0; i < n; i++) {
+    v.data[i] = (*data)[i];
+  }
+  return v;
+}
+#endif
+
 #define VECTOR_size VECTOR_IMPL(size)
 
 #ifdef VECTOR_DECLS_ONLY
