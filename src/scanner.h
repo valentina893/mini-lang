@@ -31,8 +31,8 @@ typedef struct scanner {
     char *src;
     long src_size;
 
-    // size and capacity of tokens array
-    size_t tokens_amt, tokens_max;
+    // capacity of tokens array
+    size_t tokens_max;
 
     // first char in lexeme
     int start;
