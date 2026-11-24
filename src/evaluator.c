@@ -10,7 +10,7 @@
 evaluator *evaluator_init(int tokens_amt, token **tokens) {
     evaluator *evaluator = (struct evaluator*)malloc(sizeof(struct evaluator));
     evaluator->tokens_idx = 0;
-    evaluator->tokens_amt = tokens_amt - 1;
+    evaluator->tokens_amt = tokens_amt;// - 1;
     evaluator->variable_amt = 0;
     evaluator->tokens = tokens;
     evaluator->stack = vstack_init(100);
