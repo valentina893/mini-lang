@@ -10,14 +10,11 @@
 evaluator *evaluator_init(int tokens_amt, token **tokens) {
     evaluator *evaluator = (struct evaluator*)malloc(sizeof(struct evaluator));
     evaluator->tokens_idx = 0;
-    // evaluator->tokens_amt = tokens_amt;// - 1;
-    // evaluator->variable_amt = 0;
     evaluator->tokens = tvector_init_ptr(&tokens, tokens_amt);
     evaluator->stack = vstack_init(tokens_amt);
     evaluator->if_stack = tstack_init(tokens_amt);
     evaluator->memory = var_vector_init(tokens_amt);
     evaluator->while_condition = tvector_init(tokens_amt);
-    // evaluator->while_cond_size = 0;
     evaluator->while_start = 0;
     evaluator->while_depth = 0;
     evaluator->while_flag = 0;
@@ -26,14 +23,14 @@ evaluator *evaluator_init(int tokens_amt, token **tokens) {
         if (var_vector_at(&evaluator->memory, i, &v) == 1) {
             v = NULL;
         }
-    } //evaluator->memory[i] = NULL;
+    }
     return evaluator;
 }
 
 void evaluator_run(evaluator *evaluator) {
     int exit = 0;
     for (; evaluator->tokens_idx < tvector_size(&evaluator->tokens); evaluator->tokens_idx++) {
-        token *curr_token = NULL; //evaluator->tokens[evaluator->tokens_idx];
+        token *curr_token = NULL;
         if (tvector_at(&evaluator->tokens, evaluator->tokens_idx, &curr_token)) {
             switch (curr_token->type) {
                 case ID:
@@ -67,7 +64,7 @@ void evaluator_run(evaluator *evaluator) {
 variable *_evaluator_variable_seen(evaluator *evaluator, char *id) {
     if (evaluator != NULL && id != NULL) {
         for (size_t i = 0; i < var_vector_size(&evaluator->memory); i++) {
-            variable *curr = NULL;// evaluator->memory[i];
+            variable *curr = NULL;
             if (var_vector_at(&evaluator->memory, i, &curr)) {
                 if (strcmp(curr->id, id) == 0) {
                     return curr;
@@ -88,7 +85,6 @@ int _evaluator_handle_operand(evaluator *evaluator, token *curr_token) {
                     // create a new variable in memory array if not defined
                     var = variable_init(curr_token->size, curr_token->lexeme, NULL);
                     var_vector_push(&evaluator->memory, var);
-                    //evaluator->memory[evaluator->variable_amt++] = var;
                 }
                 vstack_push(&evaluator->stack, value_init_variable(var));
                 break;
@@ -204,21 +200,15 @@ void _evaluator_save_while_condition(evaluator *evaluator) {
         if (tvector_at(&evaluator->tokens, --i, &temp_token)) {
             while (temp_token->type != LEFT_CURLY) {
                 tvector_at(&evaluator->tokens, --i, &temp_token);
-                //temp_token = evaluator->tokens[--i];
             }
             i++;
-            //size_t size = evaluator->tokens_idx - i;
-            //evaluator->while_cond_size = 0;
-            //evaluator->while_condition = //(struct token**)malloc(sizeof(struct token*) * size);
             for (; i < evaluator->tokens_idx; i++) {
                 token *t = NULL;
                 if (tvector_at(&evaluator->tokens, i, &t) == 1) {
                     tvector_push(&evaluator->while_condition, t);
                 }
-                //evaluator->while_condition[evaluator->while_cond_size++] = evaluator->tokens[i];
             }
         }
-        //token *temp_token = evaluator->tokens[--i];
     }
     return;
 }
