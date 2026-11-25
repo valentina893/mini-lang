@@ -30,19 +30,15 @@
 Evaluator class that reads tokens and uses stack-based approach to evaluate code.
 */
 typedef struct evaluator {
-    size_t tokens_idx;
-    // int tokens_amt;
-    // int variable_amt;
     vstack stack;
     tstack if_stack;
-    tvector tokens;
-    var_vector memory;
 
+    tvector tokens;
     tvector while_condition;
-    // int while_cond_size;
-    size_t while_start;
+    var_vector memory;
+    
+    size_t tokens_idx, while_start, while_flag;
     int while_depth;
-    size_t while_flag;
 } evaluator;
 
 /*
