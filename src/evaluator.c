@@ -222,7 +222,7 @@ int _evaluator_solve_while_condition(evaluator *evaluator) {
     if (evaluator != NULL) {
         vstack cond_value_stack = vstack_init(10);
         for (size_t i = 0; i < tvector_size(&evaluator->while_condition); i++) {
-            token *curr_token = NULL;//evaluator->while_condition[i];
+            token *curr_token = NULL;
             if (tvector_at(&evaluator->while_condition, i, &curr_token) == 1) {
                 switch (curr_token->type) {
                     case ID:
@@ -306,8 +306,6 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
                 if (res->integer == 1) {
                     // check which op_token we passed in
                     if (curr_token->type == IF || curr_token->type == ELIF) {
-                        //printf("pushing to if_stack:\n");
-                        //token_print(curr_token);
                         tstack_push(&evaluator->if_stack, curr_token);
                     } else if (curr_token->type == WHILE) {
                         // save the condition for re-evaluation, set flag, set start
