@@ -6,20 +6,18 @@ token *token_init(token_type type, char *data, int size, int literal, int line) 
 
     token *token = NULL;
 
-    if (data != NULL) {
-
-        token = (struct token*)malloc(sizeof(struct token));
+    token = (struct token*)malloc(sizeof(struct token));
+    if (data != NULL && size > 0) {
         token->lexeme = (char*)malloc(sizeof(char) * (size+1));
         strncpy(token->lexeme, data, size);
         token->lexeme[size] = '\0'; // strncpy doesn't add null terminator
-        token->size = size;
-        token->literal = literal;
-        token->line = line;
-        token->type = type;
-
-        return token;
-
+    } else {
+        token->lexeme = NULL;
     }
+    token->size = size;
+    token->literal = literal;
+    token->line = line;
+    token->type = type;
 
     return token;
 
@@ -59,7 +57,12 @@ int token_prec(token *token) {
 void token_print(token *token) {
 
     if (token != NULL) {
-        printf("data: %s, size: %d, literal %d, line: %d, type: ", token->lexeme, token->size, token->literal, token->line);
+        if (token->lexeme != NULL) {
+            printf("data: %s, ", token->lexeme);
+        } else {
+            printf("data: NULL, ");
+        }
+        printf("size: %d, literal %d, line: %d, type: ", token->size, token->literal, token->line);
         token_print_type(token);
     }
 
