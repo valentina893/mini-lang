@@ -40,8 +40,11 @@ typedef struct scanner {
     int current;
     // current line in src code being read
     int line;
-    // current depth for if-statements;
+    // depth for if's, while's, and right_curly's;
     int depth;
+    // previously stored while depth for break's
+    int prev_while;
+
 
     // scanner args
     int tokens_infix;
