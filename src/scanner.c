@@ -97,7 +97,8 @@ void _scanner_resize_tokens(scanner *scanner) {
 
 void _scanner_print_tokens(scanner *scanner) {
     if (scanner != NULL) {
-        for (size_t i = 0; i < stvector_size(&scanner->tokens); i++) {
+        // iterate through all tokens excluding the END token
+        for (size_t i = 0; i < stvector_size(&scanner->tokens)-1; i++) {
             printf("%zu -> ", i+1);
             token *t = NULL;
             if (stvector_at(&scanner->tokens, i, &t) == 1) {
@@ -205,7 +206,43 @@ int _scanner_is_alpha_numeric(char c) {
     return _scanner_is_alpha(c) || _scanner_is_digit(c);
 }
 
-// TODO: split this method into smaller ones to keep < 50 lines
+void _scanner_keyword(scanner *scanner, char *value_start, int length) {
+    if (scanner != NULL && value_start != NULL) {
+        // two-length keywords
+        if (length == 2) {
+            if (strncmp(value_start, "if", 2) == 0) {
+                _scanner_add_token(scanner, IF, value_start, length, scanner->depth++);
+            } else {
+                _scanner_add_token(scanner, ID, value_start, length, 0);
+            }
+        }
+        // four-length keywords
+        else if (length == 4) {
+            if (strncmp(value_start, "elif", 4) == 0) {
+                _scanner_add_token(scanner, ELIF, value_start, length, scanner->depth++);
+            } else if (strncmp(value_start, "else", 4) == 0) {
+                _scanner_add_token(scanner, ELSE, value_start, length, scanner->depth++);
+            } else {
+                _scanner_add_token(scanner, ID, value_start, length, 0);
+            }
+        }
+        // five-length keywords
+        else if (length == 5) {
+            if (strncmp(value_start, "while", 5) == 0) {
+                _scanner_add_token(scanner, WHILE, value_start, length, scanner->depth++);
+            } else if (strncmp(value_start, "break", 5) == 0) {
+                _scanner_add_token(scanner, BREAK, value_start, length, 0);
+            } else {
+                _scanner_add_token(scanner, ID, value_start, length, 0);
+            }
+        }
+        // variables
+        else {
+            _scanner_add_token(scanner, ID, value_start, length, 0);
+        }
+    }
+}
+
 void _scanner_identifier(scanner *scanner) {
 
     if (scanner != NULL) {
@@ -216,53 +253,9 @@ void _scanner_identifier(scanner *scanner) {
         if (_scanner_peek(scanner) == '(') {
             _scanner_add_token(scanner, FUNCTION, value_start, length, 0);
         }
-        // check if identifier is keyword 'if'
-        else if (strncmp(value_start, "if", 2) == 0) {
-            // should be 'if' following by whitespace
-            if (_scanner_peek(scanner) == ' ') {
-                _scanner_add_token(scanner, IF, value_start, length, scanner->depth++);
-            } else {
-                printf("mini: line %d, incorrect if-statement syntax\n", scanner->line);
-            }
-        }
-        // check if identifier is keyword 'elif'
-        else if (strncmp(value_start, "elif", 4) == 0) {
-            // should be 'elif' following by whitespace
-            if (_scanner_peek(scanner) == ' ') {
-                _scanner_add_token(scanner, ELIF, value_start, length, scanner->depth++);
-            } else {
-                printf("mini: line %d, incorrect elif-statement syntax\n", scanner->line);
-            }
-        }
-        // check if identifier is keyword 'else'
-        else if (strncmp(value_start, "else", 4) == 0) {
-            // should be 'else' following by whitespace
-            if (_scanner_peek(scanner) == ' ') {
-                _scanner_add_token(scanner, ELSE, value_start, length, scanner->depth++);
-            } else {
-                printf("mini: line %d, incorrect else syntax\n", scanner->line);
-            }
-        }
-        // check if identifier is keyword 'while'
-        else if (strncmp(value_start, "while", 5) == 0) {
-            // should be 'while' following by whitespace
-            if (_scanner_peek(scanner) == ' ') {
-                _scanner_add_token(scanner, WHILE, value_start, length, scanner->depth++);
-            } else {
-                printf("mini: line %d, incorrect while syntax\n", scanner->line);
-            }
-        }
-        // check if identifier is keyword 'break'
-        else if (strncmp(value_start, "break", 5) == 0) {
-            // should be 'break' following by whitespace or semicolon
-            if (_scanner_peek(scanner) == ' ' || _scanner_peek(scanner) == ';') {
-                _scanner_add_token(scanner, BREAK, value_start, length, 0);
-            } else {
-                printf("mini: line %d, incorrect break syntax\n", scanner->line);
-            }
-        }
+        // check if identifier is keyword or variable 
         else {
-            _scanner_add_token(scanner, ID, value_start, length, 0);
+            _scanner_keyword(scanner, value_start, length);
         }
     }
 
