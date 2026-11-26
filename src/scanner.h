@@ -136,6 +136,11 @@ Returns 1 if character c is an alphabetic character or digit, otherwise returns 
 int _scanner_is_alpha_numeric(char c);
 
 /*
+Called by _scanner_identifier when identifier is not function and could be keyword.
+*/
+void _scanner_keyword(scanner *scanner, char *value_start, int length);
+
+/*
 Called once we read an alphabetic character.
 */
 void _scanner_identifier(scanner *scanner);
