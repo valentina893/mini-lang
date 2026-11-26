@@ -23,6 +23,11 @@
 #define VECTOR_NAME var_vector
 #include "vector.h"
 
+#define STACK_T tvector
+#define STACK_PREFIX wstack_
+#define STACK_NAME wstack
+#include "stack.h"
+
 #include "token.h"
 #include "variable.h"
 
@@ -32,13 +37,14 @@ Evaluator class that reads tokens and uses stack-based approach to evaluate code
 typedef struct evaluator {
     vstack stack;
     tstack if_stack;
+    wstack while_stack;
 
     tvector tokens;
-    tvector while_condition;
+    //tvector while_condition;
     var_vector memory;
     
-    size_t tokens_idx, while_start, while_flag;
-    int while_depth;
+    size_t tokens_idx;//, while_start, while_flag;
+    //int while_depth;
 } evaluator;
 
 /*
