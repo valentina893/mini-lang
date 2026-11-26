@@ -98,6 +98,28 @@ VECTOR_init_ptr(VECTOR_T **data, size_t n) {
 }
 #endif
 
+#define VECTOR_copy VECTOR_IMPL(copy)
+
+#ifdef VECTOR_DECLS_ONLY
+
+VECTOR_LINKAGE
+VECTOR_NAME
+VECTOR_copy(VECTOR_NAME *other);
+
+#else
+
+VECTOR_LINKAGE
+VECTOR_NAME
+VECTOR_copy(VECTOR_NAME *other) {
+	VECTOR_NAME v = (VECTOR_NAME){.n = other->n, .m = other->m, .data = NULL};
+  v.data = calloc(other->m, sizeof(*other->data));
+  for (size_t i = 0; i < other->n; i++) {
+    v.data[i] = other->data[i];
+  }
+  return v;
+}
+#endif
+
 #define VECTOR_size VECTOR_IMPL(size)
 
 #ifdef VECTOR_DECLS_ONLY
