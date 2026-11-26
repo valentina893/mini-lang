@@ -13,11 +13,12 @@ evaluator *evaluator_init(int tokens_amt, token **tokens) {
     evaluator->tokens = tvector_init_ptr(&tokens, tokens_amt);
     evaluator->stack = vstack_init(tokens_amt);
     evaluator->if_stack = tstack_init(tokens_amt);
+    evaluator->while_stack = wstack_init(tokens_amt);
     evaluator->memory = var_vector_init(tokens_amt);
-    evaluator->while_condition = tvector_init(tokens_amt);
-    evaluator->while_start = 0;
-    evaluator->while_depth = 0;
-    evaluator->while_flag = 0;
+    //evaluator->while_condition = tvector_init(tokens_amt);
+    //evaluator->while_start = 0;
+    //evaluator->while_depth = 0;
+    //evaluator->while_flag = 0;
     for (int i = 0; i < tokens_amt; i++) {
         variable *v = NULL;
         if (var_vector_at(&evaluator->memory, i, &v) == 1) {
@@ -40,15 +41,42 @@ void evaluator_run(evaluator *evaluator) {
                     if (_evaluator_handle_operand(evaluator, curr_token) == 0) {exit = 1;}
                     break;
                 case RIGHT_CURLY:
-                    if (evaluator->while_flag == 1 && curr_token->literal == evaluator->while_depth) {
-                        // evaluate condition
-                        if (_evaluator_solve_while_condition(evaluator) == 1) {
-                            // reset tokens_idx to beginning of while loop
-                            evaluator->tokens_idx = evaluator->while_start;
-                        } else {
-                            // clear current while attributes
-                            evaluator->while_flag = 0;
+                    if (wstack_size(&evaluator->while_stack) > 0) {
+                        tvector condition = wstack_peek(&evaluator->while_stack);
+                        token *t = NULL;
+
+                        //for (int i = 0; i < condition.n; i++) {
+                            //token_print(condition.data[i]);
+                        //}
+                        //printf("done\n");
+
+                        // get token::literal stored in WHILE token to check depth
+                        if (tvector_at(&condition, tvector_size(&condition)-2, &t) == 1) {
+                            if (curr_token->literal == t->literal) {
+                                if (_evaluator_solve_while_condition(evaluator) == 1) {
+                                    // reset tokens_idx to beginning of while loop using INTEGER token
+                                    if (tvector_at(&condition, tvector_size(&condition)-1, &t) == 1) {
+                                        evaluator->tokens_idx = t->literal;
+                                        //printf("reset tokens_idx\n");
+                                    }
+                                    //evaluator->tokens_idx = evaluator->while_start;
+                                } else {
+                                    // pop condition from stack and delete
+                                    tvector to_free = wstack_pop(&evaluator->while_stack);
+                                    tvector_delete(&to_free);
+                                    //evaluator->while_flag = 0;
+                                }   
+                            }
                         }
+                    //if (evaluator->while_flag == 1 && curr_token->literal == evaluator->while_depth) {
+                        // evaluate condition
+                        //if (_evaluator_solve_while_condition(evaluator) == 1) {
+                            // reset tokens_idx to beginning of while loop
+                            //evaluator->tokens_idx = evaluator->while_start;
+                        //} else {
+                            // clear current while attributes
+                            //evaluator->while_flag = 0;
+                        //}
                     }
                     break;
                 case LEFT_CURLY: break;
@@ -78,6 +106,7 @@ variable *_evaluator_variable_seen(evaluator *evaluator, char *id) {
 int _evaluator_handle_operand(evaluator *evaluator, token *curr_token) {
     if (evaluator != NULL && curr_token != NULL) {
         variable *var = NULL;
+        tvector to_free;
         switch (curr_token->type) {
             case ID:
                 var = _evaluator_variable_seen(evaluator, curr_token->lexeme);
@@ -95,7 +124,10 @@ int _evaluator_handle_operand(evaluator *evaluator, token *curr_token) {
                 vstack_push(&evaluator->stack, value_init_string(curr_token->size, curr_token->lexeme));
                 break;
             case BREAK:
-                evaluator->while_flag = 0;
+                //evaluator->while_flag = 0;
+                to_free = wstack_pop(&evaluator->while_stack);
+                tvector_delete(&to_free);
+                //tvector_delete(&wstack_pop(&evaluator->while_stack));
                 _evaluator_skip_tokens(evaluator, token_init(RIGHT_CURLY, "{", 1, curr_token->literal, 0));
                 break;
             default:
@@ -202,12 +234,17 @@ void _evaluator_save_while_condition(evaluator *evaluator) {
                 tvector_at(&evaluator->tokens, --i, &temp_token);
             }
             i++;
-            for (; i < evaluator->tokens_idx; i++) {
+            tvector condition = tvector_init(evaluator->tokens_idx - i + 1);
+            for (; i <= evaluator->tokens_idx; i++) {
                 token *t = NULL;
                 if (tvector_at(&evaluator->tokens, i, &t) == 1) {
-                    tvector_push(&evaluator->while_condition, t);
+                    tvector_push(&condition, t);
                 }
             }
+            // push INTEGER token to reset token_idx
+            tvector_push(&condition, token_init(INTEGER, NULL, 0, evaluator->tokens_idx, 0));
+            //printf("size of while cond: %zu\n", condition.n);
+            wstack_push(&evaluator->while_stack, condition);
         }
     }
     return;
@@ -221,9 +258,11 @@ int _evaluator_solve_while_condition(evaluator *evaluator) {
 
     if (evaluator != NULL) {
         vstack cond_value_stack = vstack_init(10);
-        for (size_t i = 0; i < tvector_size(&evaluator->while_condition); i++) {
+        tvector condition = wstack_peek(&evaluator->while_stack);
+        for (size_t i = 0; i < tvector_size(&condition)-2; i++) {
             token *curr_token = NULL;
-            if (tvector_at(&evaluator->while_condition, i, &curr_token) == 1) {
+            if (tvector_at(&condition, i, &curr_token) == 1) {
+                //token_print(curr_token);
                 switch (curr_token->type) {
                     case ID:
                         var = _evaluator_variable_seen(evaluator, curr_token->lexeme);
@@ -252,6 +291,7 @@ int _evaluator_solve_while_condition(evaluator *evaluator) {
         value *res = vstack_pop(&cond_value_stack);
         vstack_delete(&cond_value_stack);
         if (res != NULL) {
+            //printf("solved while cond successfully\n");
             return res->integer;
         }
     }
@@ -310,9 +350,9 @@ int _evaluator_handle_unary_operation(evaluator *evaluator, token *curr_token) {
                     } else if (curr_token->type == WHILE) {
                         // save the condition for re-evaluation, set flag, set start
                         _evaluator_save_while_condition(evaluator);
-                        evaluator->while_flag = 1;
-                        evaluator->while_start = evaluator->tokens_idx;
-                        evaluator->while_depth = curr_token->literal;
+                        //evaluator->while_flag = 1;
+                        //evaluator->while_start = evaluator->tokens_idx;
+                        //evaluator->while_depth = curr_token->literal;
                     }  
                 }
                 else {
