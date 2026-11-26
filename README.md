@@ -4,14 +4,16 @@ This branch is for implementing and testing nested while loops in mini-lang.
 
 Example code:
 ```
-1| i = 0;
-2| j = 0;
-3| while i < 10 {
-4|   while j < 10 {
-5|     j = j + 1;
-6|   }
-7|  i = i + 1;
-8| }
+1 | i = 0;
+2 | while i < 10 {
+3 |   j = 0;
+4 |   while j < 10 {
+5 |     j = j + 1;
+6 |     if j == 5 {
+7 |       break;
+8 |     }
+9 |   }
+10| }
 ```
 
 ## Plan for evaluation:
