@@ -99,9 +99,9 @@ void token_print_type(token *token) {
     }
 }
 
-void token_delete(token *token) {
+void token_delete(token **token) {
     if (token != NULL) {
-        free(token->lexeme);
-        free(token);
+        free((*token)->lexeme);
+        free(*token);
     }
 }
