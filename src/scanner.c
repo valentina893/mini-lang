@@ -58,7 +58,8 @@ void _scanner_postfix(scanner *scanner) {
         }
         // set tokens array to result
         token **to_free = stvector_ptr(&scanner->tokens);
-        scanner->tokens = result;
+        stvector_clear(&scanner->tokens);
+        scanner->tokens = stvector_copy(&result);
         free(to_free);
     }
 }
