@@ -230,9 +230,10 @@ void _scanner_keyword(scanner *scanner, char *value_start, int length) {
         // five-length keywords
         else if (length == 5) {
             if (strncmp(value_start, "while", 5) == 0) {
+                scanner->prev_while = scanner->depth;
                 _scanner_add_token(scanner, WHILE, value_start, length, scanner->depth++);
             } else if (strncmp(value_start, "break", 5) == 0) {
-                _scanner_add_token(scanner, BREAK, value_start, length, 0);
+                _scanner_add_token(scanner, BREAK, value_start, length, scanner->prev_while);
             } else {
                 _scanner_add_token(scanner, ID, value_start, length, 0);
             }
