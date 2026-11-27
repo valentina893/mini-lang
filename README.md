@@ -13,7 +13,8 @@ Example code:
 7 |       break;
 8 |     }
 9 |   }
-10| }
+10|   i = i + 1;
+11| }
 ```
 
 ## Plan for evaluation:
