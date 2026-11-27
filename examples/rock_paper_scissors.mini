@@ -35,20 +35,22 @@ while game_over == 0 {
     print("2 - Paper");
     print("3 - Scissors");
 
-    choice1 = input();
+    while 1 {
+        choice1 = input();
 
-    if choice1 != "1" {
-        if choice1 != "2" {
-            if choice1 != "3" {
-                choice1 == "1";
+        if choice1 != "1" {
+            if choice1 != "2" {
+                if choice1 != "3" {
+                    print(choice1 + " is not a valid choice!");
+                } else {
+                    break;
+                }
             } else {
-                choice1 = "3";
+                break;
             }
         } else {
-            choice1 = "2";
+            break;
         }
-    } else {
-        choice1 == "1";
     }
 
 
@@ -74,20 +76,22 @@ while game_over == 0 {
         print("2 - Paper");
         print("3 - Scissors");
 
-        choice2 = input();
+        while 1 {
+            choice2 = input();
 
-        if choice2 != "1" {
-            if choice2 != "2" {
-                if choice2 != "3" {
-                    choice2 = "1";
+            if choice2 != "1" {
+                if choice2 != "2" {
+                    if choice2 != "3" {
+                        print(choice2 + " is not a valid choice!");
+                    } else {
+                        break;
+                    }
                 } else {
-                    choice2 = "3";
+                    break;
                 }
             } else {
-                choice2 = "2";
+                break;
             }
-        } else {
-            choice2 = "1";
         }
     }
 
